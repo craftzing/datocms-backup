@@ -1,0 +1,27 @@
+{
+  "name": "datocms-backup",
+  "version": "0.1.0",
+  "description": "A container to manage DatoCMS environment backups",
+  "main": "./bin/index.js",
+  "bin": "./bin/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/craftzing/datocms-backup.git"
+  },
+  "keywords": [
+    "dato",
+    "datocms",
+    "backups",
+    "container",
+    "docker"
+  ],
+  "author": "Rémi Pelhate <remi.pelhate@craftzing.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/craftzing/datocms-backup/issues"
+  },
+  "homepage": "https://github.com/craftzing/datocms-backup#readme"
+}
