@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon';
+import { createOutput, Output } from '../output';
 import { createClient, Dato } from '../dato';
-import { Command } from '../command';
-import * as Output from '../output';
+import { Command, Arguments, Options } from '../command';
 
 const PRIMARY_ENV_ALIAS = 'primary';
 
@@ -14,39 +14,60 @@ export const COMMAND: Command = {
             defaultValue: PRIMARY_ENV_ALIAS,
         },
     ],
+    options: [
+        {
+            flag: 'debug',
+            shortFlag: 'd',
+            description: 'Display debugging info',
+        },
+    ],
     handle,
 }
 
-async function handle(environmentId: string): Promise<void> {
-    const client = createClient();
-    const environmentIdToBackup = await resolveEnvironmentId(client, environmentId);
-    const backupId = await createBackupForEnvironment(client, environmentIdToBackup);
+type CreateArguments = Arguments & {
+    environmentId: string
+}
 
-    Output.completed(`Backup "${backupId}" completed.`);
+type CreateOptions = Options & {
+    debug: boolean
+}
+
+async function handle(args: CreateArguments, options: CreateOptions): Promise<void> {
+    const output = createOutput(options);
+    const client = createClient();
+    const environmentIdToBackup = await resolveEnvironmentId(output, client, args.environmentId);
+    const backupId = await createBackupForEnvironment(output, client, environmentIdToBackup);
+
+    output.completed(`Backup "${backupId}" completed.`);
     process.exit(0);
 }
 
-async function resolveEnvironmentId(client: Dato, environmentId: string): Promise<string> {
+async function resolveEnvironmentId(output: Output, client: Dato, environmentId: string): Promise<string> {
     if (environmentId !== PRIMARY_ENV_ALIAS) {
         return environmentId;
     }
 
-    Output.line('Resolving primary environment...', '🔎');
+    output.line('Resolving primary environment...', '🔎');
 
     const primaryEnvironmentId = await client.primaryEnvironmentId();
+
+    output.debug(`Found "${primaryEnvironmentId}"`);
 
     return primaryEnvironmentId;
 }
 
-async function createBackupForEnvironment(client: Dato, environmentId: string): Promise<string> {
+async function createBackupForEnvironment(output: Output, client: Dato, environmentId: string): Promise<string> {
     const backupId = `backup-${DateTime.local().toFormat('yyyy-LL-dd')}`;
 
-    Output.line(`Creating backup for "${environmentId}" environment...`, '⏳');
+    output.line(`Creating backup for "${environmentId}" environment...`, '⏳');
 
     try {
         const backup = await client.forkEnvironment(environmentId, backupId);
+
+        output.debug(backup);
     } catch (exception) {
-        Output.error(`Backup "${backupId}" failed due to an error response from the DatoCMS API.`);
+        output.error(`Backup "${backupId}" failed due to an error response from the DatoCMS API.`);
+        output.debug(exception);
         process.exit(1);
     }
 

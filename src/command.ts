@@ -1,13 +1,28 @@
 export type Command = {
     readonly name: string
-    readonly arguments: [Argument]
+    readonly arguments: [ArgumentDefinition]
+    readonly options?: [OptionDefinition]
     readonly handle: Handler
 }
 
-export type Argument = {
+export type ArgumentDefinition = {
     readonly name: string
     readonly description: string
     readonly defaultValue?: any
 }
 
-export type Handler = (args: any) => Promise<void>;
+export type Arguments = {
+    [name: string]: string
+}
+
+export type OptionDefinition = {
+    readonly flag: string
+    readonly shortFlag: string
+    readonly description: string
+}
+
+export type Options = {
+    [name: string]: boolean
+}
+
+export type Handler = (args: Arguments, options: Options) => Promise<void>;
