@@ -37,11 +37,12 @@ export function createKernel(...commands: Command[]): Kernel {
             flags = `-${option.shortFlag}, ${flags}`;
         }
 
-        cmd.option(flags, option.description);
+        cmd.option(flags, option.description, option.defaultValue || undefined);
     }
 
     function mapInputToCommandHandler(command: Command, ...input: any[]): Promise<void> {
-        const args = command.arguments.reduce<Arguments>((
+        const argumentDefinitions = command.arguments ?? [];
+        const args = argumentDefinitions.reduce<Arguments>((
             args: Arguments,
             arg: ArgumentDefinition,
             position: number,
