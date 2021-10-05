@@ -5,16 +5,18 @@ export type Kernel = {
     readonly boot: () => void
 }
 
-export function createKernel(...commands: [Command]): Kernel {
+export function createKernel(...commands: Command[]): Kernel {
     const cli: Commander.Command = new Commander.Command();
 
     commands.forEach(registerCommand);
 
     function registerCommand(command: Command) {
         const cmd = cli.command(command.name);
+        const argumentDefinitions = command.arguments ?? [];
+        const optionDefinitions = command.options ?? [];
 
-        command.arguments.forEach((argument: ArgumentDefinition): void => registerCommandArgument(cmd, argument));
-        command.options.forEach((option: OptionDefinition): void => registerCommandOption(cmd, option));
+        argumentDefinitions.forEach((argument: ArgumentDefinition): void => registerCommandArgument(cmd, argument));
+        optionDefinitions.forEach((option: OptionDefinition): void => registerCommandOption(cmd, option));
         cmd.action((...input: any[]) => mapInputToCommandHandler(command, ...input));
     }
 
