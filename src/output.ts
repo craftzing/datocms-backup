@@ -21,10 +21,12 @@ export function createOutput(options: OutputOptions): Output {
 
     function completed(message: string): void {
         console.log(FG_GREEN + `✨ ${message}` + RESET);
+        process.exit(0);
     }
 
     function error(message: string): void {
         console.error(FG_RED + `🧨 ${message}` + RESET);
+        process.exit(1);
     }
 
     function debug(data: any): void {

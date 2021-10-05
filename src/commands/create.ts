@@ -39,7 +39,6 @@ async function handle(args: CreateArguments, options: CreateOptions): Promise<vo
     const backupId = await createBackupForEnvironment(output, client, environmentIdToBackup);
 
     output.completed(`Backup "${backupId}" completed.`);
-    process.exit(0);
 }
 
 async function resolveEnvironmentId(output: Output, client: Dato, environmentId: string): Promise<string> {
@@ -66,9 +65,8 @@ async function createBackupForEnvironment(output: Output, client: Dato, environm
 
         output.debug(backup);
     } catch (exception) {
-        output.error(`Backup "${backupId}" failed due to an error response from the DatoCMS API.`);
         output.debug(exception);
-        process.exit(1);
+        output.error(`Backup "${backupId}" failed due to an error response from the DatoCMS API.`);
     }
 
     return backupId;
