@@ -1,7 +1,7 @@
 export type Command = {
     readonly name: string
     readonly arguments: [Argument]
-    readonly handle: CommandHandler
+    readonly handle: Handler
 }
 
 export type Argument = {
@@ -10,4 +10,4 @@ export type Argument = {
     readonly defaultValue?: any
 }
 
-export type CommandHandler = (args: any) => void;
+export type Handler = (args: any) => Promise<void>;

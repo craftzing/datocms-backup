@@ -15,12 +15,11 @@ export function createKernel(...commands: [Command]): Kernel {
 
         command.arguments.forEach((argument: Argument): void => registerCommandArgument(cmd, argument));
         cmd.action(command.handle);
-
         cli.addCommand(cmd);
     }
 
     function registerCommandArgument(cmd: Commander.Command, argument: Argument): void {
-        const arg = cmd.createArgument(argument.name);
+        const arg = cmd.createArgument(argument.name, argument.description);
 
         if (argument.hasOwnProperty('defaultValue')) {
             arg.argOptional().default(argument.defaultValue);
