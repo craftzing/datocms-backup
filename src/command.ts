@@ -1,6 +1,6 @@
 export type Command = {
     readonly name: string
-    readonly arguments: [ArgumentDefinition]
+    readonly arguments?: [ArgumentDefinition]
     readonly options?: [OptionDefinition]
     readonly handle: Handler
 }
@@ -17,7 +17,7 @@ export type Arguments = {
 
 export type OptionDefinition = {
     readonly flag: string
-    readonly shortFlag: string
+    readonly shortFlag?: string
     readonly description: string
 }
 

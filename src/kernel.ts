@@ -31,7 +31,11 @@ export function createKernel(...commands: Command[]): Kernel {
     }
 
     function registerCommandOption(cmd: Commander.Command, option: OptionDefinition): void {
-        const flags = `-${option.shortFlag}, --${option.flag}`;
+        let flags = `--${option.flag}`;
+
+        if (option.hasOwnProperty('shortFlag')) {
+            flags = `-${option.shortFlag}, ${flags}`;
+        }
 
         cmd.option(flags, option.description);
     }
