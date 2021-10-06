@@ -8,6 +8,7 @@ export type Command = {
 export type ArgumentDefinition = {
     readonly name: string
     readonly description: string
+    readonly choices?: string[]
     readonly defaultValue?: any
 }
 

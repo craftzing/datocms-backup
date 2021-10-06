@@ -23,6 +23,10 @@ export function createKernel(...commands: Command[]): Kernel {
     function registerCommandArgument(cmd: Commander.Command, argument: ArgumentDefinition): void {
         const arg = cmd.createArgument(argument.name, argument.description);
 
+        if (argument.hasOwnProperty('choices')) {
+            arg.choices(argument.choices);
+        }
+
         if (argument.hasOwnProperty('defaultValue')) {
             arg.argOptional().default(argument.defaultValue);
         }
