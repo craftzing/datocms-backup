@@ -1,7 +1,8 @@
 import { DateTime } from 'luxon';
 import { Output } from '../output';
-import { createClient, Dato } from '../dato';
+import { createClient, BackupEnvironmentId, Dato } from '../dato';
 import { Command, Arguments, Options } from '../command';
+import { DEBUG } from '../common/options';
 
 const PRIMARY_ENV_ALIAS = 'primary';
 
@@ -15,11 +16,7 @@ export const COMMAND: Command = {
         },
     ],
     options: [
-        {
-            flag: 'debug',
-            shortFlag: 'd',
-            description: 'Display debugging info',
-        },
+        DEBUG,
     ],
     handle,
 }
@@ -55,7 +52,7 @@ async function resolveEnvironmentId(output: Output, client: Dato, environmentId:
 }
 
 async function createBackupForEnvironment(output: Output, client: Dato, environmentId: string): Promise<string> {
-    const backupId = `backup-${DateTime.local().toFormat('yyyy-LL-dd')}`;
+    const backupId: BackupEnvironmentId = `backup-${DateTime.local().toFormat('yyyy-LL-dd')}`;
 
     output.line(`Creating backup for "${environmentId}" environment...`, '⏳');
 
