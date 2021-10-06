@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon';
-import { createOutput, Output } from '../output';
+import { Output } from '../output';
 import { createClient, Dato } from '../dato';
 import { Command, Arguments, Options } from '../command';
 
@@ -32,8 +32,7 @@ type CreateOptions = Options & {
     debug: boolean
 }
 
-async function handle(args: CreateArguments, options: CreateOptions): Promise<void> {
-    const output = createOutput(options);
+async function handle(args: CreateArguments, options: CreateOptions, output: Output): Promise<void> {
     const client = createClient();
     const environmentIdToBackup = await resolveEnvironmentId(output, client, args.environmentId);
     const backupId = await createBackupForEnvironment(output, client, environmentIdToBackup);

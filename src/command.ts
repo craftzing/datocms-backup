@@ -1,3 +1,5 @@
+import { Output } from './output';
+
 export type Command = {
     readonly name: string
     readonly arguments?: ArgumentDefinition[]
@@ -27,4 +29,4 @@ export type Options = {
     [name: string]: boolean
 }
 
-export type Handler = (args: Arguments, options: Options) => Promise<void>;
+export type Handler = (args: Arguments, options: Options, output: Output) => Promise<void>;
