@@ -62,11 +62,9 @@ export function createKernel(...commands: Command[]): Kernel {
         return command.handle(args, opts, output);
     }
 
-    function boot(): void {
-        cli.parse(process.argv);
-    }
-
     return {
-        boot,
+        boot(): void {
+            cli.parse(process.argv);
+        },
     };
 }
