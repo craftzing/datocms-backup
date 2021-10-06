@@ -20,7 +20,7 @@ export function createKernel(...commands: Command[]): Kernel {
         argumentDefinitions.forEach((argument: ArgumentDefinition): void => registerCommandArgument(cmd, argument));
         optionDefinitions.forEach((option: OptionDefinition): void => registerCommandOption(cmd, option));
         subCommandDefinitions.forEach((subCommand: Command): void => registerCommand(subCommand, cmd));
-        cmd.action((...input: any[]) => mapInputToCommandHandler(command, ...input));
+        cmd.action((...input: any[]) => mapInputToCommandHandler(cmd, command, ...input));
     }
 
     function registerCommandArgument(cmd: Commander.Command, argument: ArgumentDefinition): void {
@@ -47,9 +47,9 @@ export function createKernel(...commands: Command[]): Kernel {
         cmd.option(flags, option.description, option.defaultValue || undefined);
     }
 
-    function mapInputToCommandHandler(command: Command, ...input: any[]): Promise<void> {
+    function mapInputToCommandHandler(cmd: Commander.Command, command: Command, ...input: any[]): Promise<void> {
         const argumentDefinitions = command.arguments ?? [];
-        const args = argumentDefinitions.reduce<Arguments>((
+        const args = argumentDefinitions.reduce((
             args: Arguments,
             arg: ArgumentDefinition,
             position: number,
@@ -59,7 +59,7 @@ export function createKernel(...commands: Command[]): Kernel {
             return args;
         }, {});
         const opts: Options = input[Object.keys(args).length];
-        const output: Output = createOutput(opts);
+        const output: Output = createOutput(opts, () => cmd.help());
 
         return command.handle(args, opts, output);
     }

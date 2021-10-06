@@ -12,13 +12,14 @@ export type Output = {
     completed: (message: string) => void
     error: (message: string) => void
     debug: (...data: any[]) => void
+    help: () => void
 }
 
 export type OutputOptions = {
     debug?: boolean
 }
 
-export function createOutput(options: OutputOptions): Output {
+export function createOutput(options: OutputOptions, help: Function): Output {
     return {
         misconfig(message: string): void {
             console.log(`error: ${message}`);
@@ -55,6 +56,10 @@ export function createOutput(options: OutputOptions): Output {
             }
 
             console.log(FG_MAGENTA + '[debug]' + RESET, ...data);
+        },
+
+        help(): void {
+            help();
         },
     };
 }
