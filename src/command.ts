@@ -5,6 +5,7 @@ export type Command = {
     readonly arguments?: ArgumentDefinition[]
     readonly options?: OptionDefinition[]
     readonly handle: Handler
+    readonly subCommands?: Command[]
 }
 
 export type ArgumentDefinition = {
@@ -27,6 +28,7 @@ export type OptionDefinition = {
 
 export type Options = {
     [name: string]: boolean
+    debug: boolean
 }
 
 export type Handler = (args: Arguments, options: Options, output: Output) => Promise<void>;

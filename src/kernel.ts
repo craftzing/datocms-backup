@@ -9,15 +9,17 @@ export type Kernel = {
 export function createKernel(...commands: Command[]): Kernel {
     const cli: Commander.Command = new Commander.Command();
 
-    commands.forEach(registerCommand);
+    commands.forEach((command: Command) => registerCommand(command, cli));
 
-    function registerCommand(command: Command) {
+    function registerCommand(command: Command, cli: Commander.Command): void {
         const cmd = cli.command(command.name);
         const argumentDefinitions = command.arguments ?? [];
         const optionDefinitions = command.options ?? [];
+        const subCommandDefinitions = command.subCommands ?? [];
 
         argumentDefinitions.forEach((argument: ArgumentDefinition): void => registerCommandArgument(cmd, argument));
         optionDefinitions.forEach((option: OptionDefinition): void => registerCommandOption(cmd, option));
+        subCommandDefinitions.forEach((subCommand: Command): void => registerCommand(subCommand, cmd));
         cmd.action((...input: any[]) => mapInputToCommandHandler(command, ...input));
     }
 
