@@ -28,5 +28,7 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ghcr.io/${{ github.repository }}:${{ steps.tag.outputs.tag }}
+          build-args: |
+            CLI_VERSION=${{ steps.tag.outputs.tag }}
       - name: 'Image digest'
         run: echo ${{ steps.buildAndPush.outputs.digest }}
