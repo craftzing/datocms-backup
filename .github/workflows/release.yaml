@@ -25,3 +25,7 @@ jobs:
         with:
           version: ${{ steps.tag.outputs.tag }}
           puh: true
+      - name: 'Run Trivy scans'
+        uses: ./.github/actions/run-trivy-scans
+        with:
+          image-version: ${{ steps.tag.outputs.tag }}

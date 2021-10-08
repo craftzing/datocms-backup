@@ -20,4 +20,3 @@ jobs:
         uses: ./.github/actions/run-trivy-scans
         with:
           image-version: ${{ steps.shortSha.outputs.sha }}
-
