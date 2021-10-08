@@ -24,34 +24,29 @@ export type Dato = {
 export function createClient(): Dato {
     const siteClient = new SiteClient(process.env.DATOCMS_BACKUP_API_TOKEN);
 
-    async function backups(): Promise<[BackupEnvironment]> {
-        const environments = await siteClient.environments.all();
-
-        return environments.filter((backup: Environment): boolean => backup.id.startsWith('backup-'));
-    }
-
-    async function primaryEnvironmentId(): Promise<string> {
-        const envs: [Environment] = await siteClient.environments.all();
-
-        return envs.find(isPrimaryEnvironment).id;
-    }
-
-    async function forkEnvironment(environmentId: string, forkId: BackupEnvironmentId): Promise<Environment> {
-        return siteClient.environments.fork(environmentId, { id: forkId });
-    }
-
-    async function deleteEnvironmentById(environmentId: BackupEnvironmentId): Promise<BackupEnvironment> {
-        return siteClient.environments.destroy(environmentId);
+    function isPrimaryEnvironment(env: Environment): boolean {
+        return env.meta.primary === true;
     }
 
     return {
-        backups,
-        primaryEnvironmentId,
-        forkEnvironment,
-        deleteEnvironmentById,
-    };
-}
+        async backups(): Promise<[BackupEnvironment]> {
+            const environments = await siteClient.environments.all();
 
-function isPrimaryEnvironment(env: Environment): boolean {
-    return env.meta.primary === true;
+            return environments.filter((backup: Environment): boolean => backup.id.startsWith('backup-'));
+        },
+
+        async primaryEnvironmentId(): Promise<string> {
+            const envs: [Environment] = await siteClient.environments.all();
+
+            return envs.find(isPrimaryEnvironment).id;
+        },
+
+        async forkEnvironment(environmentId: string, forkId: BackupEnvironmentId): Promise<Environment> {
+            return siteClient.environments.fork(environmentId, { id: forkId });
+        },
+
+        async deleteEnvironmentById(environmentId: BackupEnvironmentId): Promise<BackupEnvironment> {
+            return siteClient.environments.destroy(environmentId);
+        },
+    }
 }
