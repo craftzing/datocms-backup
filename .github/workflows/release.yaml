@@ -20,7 +20,8 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: ./.github/actions/build-docker-image
+      - name: 'Build and push image to GitHub CR'
+        uses: ./.github/actions/build-docker-image
         with:
           version: ${{ steps.tag.outputs.tag }}
           puh: true
