@@ -3,7 +3,7 @@ description: 'Build (and optionally push) the Docker image'
 inputs:
   version:
     required: true
-    description: 'Version for the new image built'
+    description: 'Version for the new image build'
   push:
     required: false
     description: 'Push the built image to Github CR'
