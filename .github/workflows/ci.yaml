@@ -8,7 +8,15 @@ jobs:
     steps:
       - name: 'Checkout code'
         uses: actions/checkout@v2
+      - uses: benjlevesque/short-sha@v1.2
+        id: shortSha
+        with:
+          length: 8
       - name: 'Build Docker image'
         uses: ./.github/actions/build-docker-image
         with:
-          version: ${{ github.sha }}
+          version: ${{ steps.shortSha.outputs.sha }}
+      - name: 'Run Trivy scans'
+        uses: ./.github/actions/run-trivy-scans
+        with:
+          image-version: ${{ steps.shortSha.outputs.sha }}
