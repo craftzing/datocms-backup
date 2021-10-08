@@ -1,0 +1,20 @@
+name: 'Run Trivy scans'
+description: 'Run Trivy security and misconfiguration scans'
+inputs:
+  image-version:
+    required: true
+    description: 'Version of the newly built image'
+runs:
+  using: 'composite'
+  steps:
+    - name: 'Run Trivy vulnerability scan'
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ghcr.io/${{ github.repository }}:${{ inputs.image-version }}
+        format: 'template'
+        template: '@/contrib/sarif.tpl'
+        output: 'trivy-results.sarif'
+    - name: 'Upload Trivy scan results to GitHub Security'
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: 'trivy-results.sarif'
