@@ -1,4 +1,4 @@
-import { runCommand } from '../.jest/commandHelpers';
+import { runCommand } from '../.jest/utils/commands';
 
 describe('cli', () => {
     it('should display help info by default', async () => {
