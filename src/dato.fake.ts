@@ -1,6 +1,6 @@
 import * as faker from 'faker';
 import { DateTime } from 'luxon';
-import { BackupEnvironment, BackupEnvironmentId, Environment } from './dato';
+import { BackupEnvironment, BackupEnvironmentId, Dato, Environment } from './dato';
 
 let environments: Environment[] = [];
 
@@ -10,7 +10,7 @@ function fakeEnvironments(...envs: Environment[]) {
     return this;
 }
 
-function fakeMainEnvironment(): Environment {
+export function fakeMainEnvironment(): Environment {
     const env = {
         id: 'main',
         meta: {
@@ -24,7 +24,7 @@ function fakeMainEnvironment(): Environment {
     return env;
 }
 
-function fakeBackup(): BackupEnvironment {
+export function fakeBackup(): BackupEnvironment {
     const isoBackupDate = faker.date.past();
     const backupDate = DateTime.fromISO(faker.date.past()).toFormat('yyyy-LL-dd');
     const backupId: BackupEnvironmentId = `backup-${backupDate}`;
@@ -41,7 +41,7 @@ function fakeBackup(): BackupEnvironment {
     return env;
 }
 
-function fakeSandboxEnvironment(id?: string): Environment {
+export function fakeSandboxEnvironment(id?: string): Environment {
     const env = {
         id: id ?? faker.lorem.word(),
         meta: {
@@ -56,10 +56,6 @@ function fakeSandboxEnvironment(id?: string): Environment {
 }
 
 export const fakeSiteClient = {
-    fakeEnvironments,
-    fakeMainEnvironment,
-    fakeBackup,
-    fakeSandboxEnvironment,
     environments: {
         all(): Promise<Environment[]> {
             return new Promise((resolve) => resolve(environments));

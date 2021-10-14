@@ -1,6 +1,6 @@
 import { SiteClient } from 'datocms-client';
 import { createClient, Dato, Environment } from './dato';
-import { fakeSiteClient } from './dato.fake';
+import { fakeSiteClient, fakeMainEnvironment, fakeBackup, fakeSandboxEnvironment } from './dato.fake';
 
 jest.mock('datocms-client', () => ({
     ...jest.requireActual<object>('datocms-client'),
@@ -16,8 +16,8 @@ describe('client', () => {
 
     it("returns an empty array when getting backups when there aren't any", async () => {
         const client: Dato = createClient();
-        fakeSiteClient.fakeMainEnvironment();
-        fakeSiteClient.fakeSandboxEnvironment();
+        fakeMainEnvironment();
+        fakeSandboxEnvironment();
 
         const backups = await client.backups();
 
@@ -26,12 +26,12 @@ describe('client', () => {
 
     it('can get all backups', async () => {
         const client: Dato = createClient();
-        fakeSiteClient.fakeMainEnvironment();
+        fakeMainEnvironment();
         const expectation = [
-            fakeSiteClient.fakeBackup(),
-            fakeSiteClient.fakeBackup(),
+            fakeBackup(),
+            fakeBackup(),
         ];
-        fakeSiteClient.fakeSandboxEnvironment();
+        fakeSandboxEnvironment();
 
         const backups = await client.backups();
 
@@ -40,9 +40,9 @@ describe('client', () => {
 
     it('can return the primary environment id', async () => {
         const client: Dato = createClient();
-        fakeSiteClient.fakeBackup();
-        fakeSiteClient.fakeMainEnvironment();
-        fakeSiteClient.fakeSandboxEnvironment();
+        fakeBackup();
+        fakeMainEnvironment();
+        fakeSandboxEnvironment();
 
         const primaryEnvironmentId = await client.primaryEnvironmentId();
 
@@ -53,7 +53,7 @@ describe('client', () => {
         const client: Dato = createClient();
         const environmentId = 'main';
         const forkId = 'backup-some-timestamp';
-        fakeSiteClient.fakeMainEnvironment();
+        fakeMainEnvironment();
 
         const backup = await client.forkEnvironment(environmentId, forkId);
 
@@ -67,7 +67,7 @@ describe('client', () => {
 
     it('can delete a backup environment by ID', async () => {
         const client: Dato = createClient();
-        const backup = fakeSiteClient.fakeBackup();
+        const backup = fakeBackup();
 
         const deletedBackup = await client.deleteEnvironmentById(backup.id);
 
