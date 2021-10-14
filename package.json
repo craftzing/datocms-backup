@@ -5,7 +5,8 @@
   "main": "./bin/index.js",
   "bin": "./bin/index.js",
   "scripts": {
-    "backup": "rm -rf bin && npx tsc && node ./bin/index.js",
+    "backup": "npm run build && node ./bin/index.js",
+    "build": "rm -rf bin && npx tsc",
     "test": "jest"
   },
   "repository": {

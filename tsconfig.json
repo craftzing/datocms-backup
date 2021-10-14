@@ -8,7 +8,8 @@
     "outDir": "bin",
     "baseUrl": ".",
     "emitDecoratorMetadata": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "types": ["node", "jest"]
   },
   "include": ["src/**/*"],
   "exclude": [
