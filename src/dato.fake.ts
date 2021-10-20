@@ -1,18 +1,41 @@
 import * as faker from 'faker';
 import { DateTime } from 'luxon';
-import { BackupEnvironment, BackupEnvironmentId, Dato, Environment } from './dato';
+import { Dato, BackupEnvironment, BackupEnvironmentId, Environment } from './dato';
 
+beforeEach(() => {
+    jest.clearAllMocks();
+    reset();
+});
+
+const PRIMARY_ENV_ID = 'main';
 let environments: Environment[] = [];
+let errors: {
+    [name: string]: Error | undefined
+} = {};
 
-function fakeEnvironments(...envs: Environment[]) {
-    environments = environments.concat(envs);
-
-    return this;
+function reset(): void {
+    environments = [];
+    errors = {
+        primaryEnvironmentId: undefined,
+        forkEnvironment: undefined,
+    };
 }
 
-export function fakeMainEnvironment(): Environment {
+export function fakeErrorWhileResolvingPrimaryId(): void {
+    errors.primaryEnvironmentId = new Error('Faked missing primary environment.');
+}
+
+export function fakeErrorWhileCreatingBackup(): void {
+    errors.forkEnvironment = new Error('Faked an error while creating a backup.');
+}
+
+function fakeEnvironments(...envs: Environment[]): void {
+    environments = environments.concat(envs);
+}
+
+export function fakePrimaryEnvironment(): Environment {
     const env = {
-        id: 'main',
+        id: PRIMARY_ENV_ID,
         meta: {
             primary: true,
             createdAt: faker.date.past(),
@@ -55,16 +78,16 @@ export function fakeSandboxEnvironment(id?: string): Environment {
     return env;
 }
 
-export const fakeSiteClient = {
+export const siteClient = {
     environments: {
         all(): Promise<Environment[]> {
-            return new Promise((resolve) => resolve(environments));
+            return Promise.resolve(environments);
         },
 
         fork: jest.fn((environmentId: string, { id }: { id: BackupEnvironmentId }): Promise<Environment> => {
             const fork = fakeSandboxEnvironment(id);
 
-            return new Promise((resolve) => resolve(fork));
+            return Promise.resolve(fork);
         }),
 
         destroy: jest.fn((environmentId: string): Promise<BackupEnvironment> => {
@@ -79,7 +102,35 @@ export const fakeSiteClient = {
                 return false;
             });
 
-            return new Promise((resolve) => resolve(deletedEnvironment));
+            return Promise.resolve(deletedEnvironment);
         }),
+    },
+};
+
+export const client: Dato = {
+    backups(): Promise<[BackupEnvironment?]> {
+        return Promise.resolve([]);
+    },
+
+    primaryEnvironmentId(): Promise<string> {
+        if (errors.primaryEnvironmentId) {
+            throw errors.primaryEnvironmentId;
+        }
+
+        return Promise.resolve(PRIMARY_ENV_ID);
+    },
+
+    forkEnvironment: jest.fn((environmentId: string, forkId: BackupEnvironmentId): Promise<Environment> => {
+        if (errors.forkEnvironment) {
+            throw errors.forkEnvironment;
+        }
+
+        const backup = fakeBackup();
+
+        return Promise.resolve(backup);
+    }),
+
+    async deleteEnvironmentById(environmentId: BackupEnvironmentId): Promise<BackupEnvironment> {
+        return await siteClient.environments.destroy(environmentId);
     },
 };
