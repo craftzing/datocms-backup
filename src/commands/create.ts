@@ -44,11 +44,16 @@ async function resolveEnvironmentId(output: Output, client: Dato, environmentId:
 
     output.line('Resolving primary environment...', '🔎');
 
-    const primaryEnvironmentId = await client.primaryEnvironmentId();
+    try {
+        const primaryEnvironmentId = await client.primaryEnvironmentId();
 
-    output.debug(`Found "${primaryEnvironmentId}"`);
+        output.debug(`Found "${primaryEnvironmentId}"`);
 
-    return primaryEnvironmentId;
+        return primaryEnvironmentId;
+    } catch (exception) {
+        output.debug(exception);
+        output.error(`Failed to resolve the primary environment due to an error response from the DatoCMS API.`);
+    }
 }
 
 async function createBackupForEnvironment(output: Output, client: Dato, environmentId: string): Promise<string> {

@@ -1,7 +1,10 @@
 /.git
 /.github
 /.idea
+/.jest
 /bin
+/src/**/*.fake.ts
+/src/**/*.spec.ts
 /node_modules
 .DS_Store
 README.md

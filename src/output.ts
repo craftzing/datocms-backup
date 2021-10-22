@@ -19,7 +19,7 @@ export type OutputOptions = {
     debug?: boolean
 }
 
-export function createOutput(options: OutputOptions, help: Function): Output {
+export function createOutput(options: OutputOptions, help: string): Output {
     return {
         misconfig(message: string): void {
             console.log(`error: ${message}`);
@@ -59,7 +59,8 @@ export function createOutput(options: OutputOptions, help: Function): Output {
         },
 
         help(): void {
-            help();
+            console.log(help);
+            process.exit(1);
         },
     };
 }

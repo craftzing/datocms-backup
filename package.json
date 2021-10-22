@@ -5,8 +5,9 @@
   "main": "./bin/index.js",
   "bin": "./bin/index.js",
   "scripts": {
-    "backup": "rm -rf bin && npx tsc && node ./bin/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "backup": "npm run build && node ./bin/index.js",
+    "build": "rm -rf bin && npx tsc",
+    "tests": "jest"
   },
   "repository": {
     "type": "git",
@@ -32,7 +33,11 @@
     "luxon": "^2.0.2"
   },
   "devDependencies": {
+    "@types/jest": "^27.0.2",
     "@types/node": "^16.10.2",
+    "faker": "^5.5.3",
+    "jest": "^27.2.5",
+    "ts-jest": "^27.0.5",
     "typescript": "^4.4.3"
   }
 }
