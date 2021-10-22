@@ -16,6 +16,7 @@ export type Output = {
 }
 
 export type OutputOptions = {
+    confirm?: boolean
     debug?: boolean
 }
 
@@ -31,6 +32,10 @@ export function createOutput(options: OutputOptions, help: string): Output {
         },
 
         async confirm(question: string): Promise<boolean> {
+            if (options.confirm) {
+                return Promise.resolve(true);
+            }
+
             const { answer } = await prompt({
                 type: 'confirm',
                 name: 'answer',
