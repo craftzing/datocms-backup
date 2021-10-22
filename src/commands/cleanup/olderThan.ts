@@ -2,7 +2,7 @@ import { DateTime, Duration } from 'luxon';
 import { Arguments, Command, Options } from '../../command';
 import { Output } from '../../output';
 import { createClient, BackupEnvironment } from '../../dato';
-import { DEBUG } from '../../common/options';
+import { DEBUG, CONFIRM } from '../../common/options';
 
 export const COMMAND: Command = {
     name: 'older-than',
@@ -14,6 +14,7 @@ export const COMMAND: Command = {
     ],
     options: [
         DEBUG,
+        CONFIRM,
     ],
     handle,
 }
