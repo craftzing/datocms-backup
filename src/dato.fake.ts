@@ -1,6 +1,6 @@
 import * as faker from 'faker';
 import { DateTime } from 'luxon';
-import { Dato, BackupEnvironment, BackupEnvironmentId, Environment } from './dato';
+import {Dato, BackupEnvironment, BackupEnvironmentId, Environment, isBackupEnvironment} from './dato';
 
 beforeEach(() => {
     jest.clearAllMocks();
@@ -17,12 +17,17 @@ function reset(): void {
     environments = [];
     errors = {
         primaryEnvironmentId: undefined,
+        backups: undefined,
         forkEnvironment: undefined,
     };
 }
 
 export function fakeErrorWhileResolvingPrimaryId(): void {
     errors.primaryEnvironmentId = new Error('Faked missing primary environment.');
+}
+
+export function fakeErrorWhileGettingBackups(): void {
+    errors.backups = new Error('Faked an error while getting backups.');
 }
 
 export function fakeErrorWhileCreatingBackup(): void {
@@ -47,9 +52,9 @@ export function fakePrimaryEnvironment(): Environment {
     return env;
 }
 
-export function fakeBackup(): BackupEnvironment {
-    const isoBackupDate = faker.date.past();
-    const backupDate = DateTime.fromISO(faker.date.past()).toFormat('yyyy-LL-dd');
+export function fakeBackup(isoBackupDate?: string): BackupEnvironment {
+    isoBackupDate = isoBackupDate || faker.date.past();
+    const backupDate = DateTime.fromISO(isoBackupDate).toFormat('yyyy-LL-dd');
     const backupId: BackupEnvironmentId = `backup-${backupDate}`;
     const env = {
         id: backupId,
@@ -108,8 +113,12 @@ export const siteClient = {
 };
 
 export const client: Dato = {
-    backups(): Promise<[BackupEnvironment?]> {
-        return Promise.resolve([]);
+    backups(): Promise<BackupEnvironment[]> {
+        if (errors.backups) {
+            throw errors.backups;
+        }
+
+        return Promise.resolve(environments.filter(isBackupEnvironment));
     },
 
     primaryEnvironmentId(): Promise<string> {
@@ -130,7 +139,7 @@ export const client: Dato = {
         return Promise.resolve(backup);
     }),
 
-    async deleteEnvironmentById(environmentId: BackupEnvironmentId): Promise<BackupEnvironment> {
+    deleteEnvironmentById: jest.fn(async (environmentId: BackupEnvironmentId): Promise<BackupEnvironment> => {
         return await siteClient.environments.destroy(environmentId);
-    },
+    }),
 };

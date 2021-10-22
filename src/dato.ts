@@ -15,7 +15,7 @@ export type BackupEnvironment = Environment & {
 export type BackupEnvironmentId = `backup-${string}`;
 
 export type Dato = {
-    backups: () => Promise<[BackupEnvironment?]>
+    backups: () => Promise<BackupEnvironment[]>
     primaryEnvironmentId: () => Promise<string>
     forkEnvironment: (environmentId: string, forkId: BackupEnvironmentId) => Promise<Environment>
     deleteEnvironmentById: (environmentId: BackupEnvironmentId) => Promise<BackupEnvironment>
@@ -25,10 +25,10 @@ export function createClient(): Dato {
     const siteClient = new SiteClient(process.env.DATOCMS_BACKUP_API_TOKEN);
 
     return {
-        async backups(): Promise<[BackupEnvironment?]> {
+        async backups(): Promise<BackupEnvironment[]> {
             const environments = await siteClient.environments.all();
 
-            return environments.filter((backup: Environment): boolean => backup.id.startsWith('backup-'));
+            return environments.filter(isBackupEnvironment);
         },
 
         async primaryEnvironmentId(): Promise<string> {
@@ -51,3 +51,6 @@ export function isPrimaryEnvironment(env: Environment): boolean {
     return env.meta.primary === true;
 }
 
+export function isBackupEnvironment(backup: Environment): backup is BackupEnvironment {
+    return backup.id.startsWith('backup-');
+}

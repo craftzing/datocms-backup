@@ -46,7 +46,9 @@ async function handle(args: OlderThanArguments, options: Options, output: Output
     output.debug('Backups older than retention date:', backupsOlderThanRetentionDate);
 
     if (backupsOlderThanRetentionDate.length === 0) {
-        output.completed('Cleanup completed. There were no backups to be deleted.')
+        output.completed('Cleanup completed. There were no backups to be deleted.');
+
+        return;
     }
 
     output.line('The following backups are about to be deleted:', '⚠️')
@@ -57,7 +59,9 @@ async function handle(args: OlderThanArguments, options: Options, output: Output
     );
 
     if (! shouldDeleteOldBackups) {
-        output.completed('Cleanup cancelled.');
+        output.completed('Cleanup canceled.');
+
+        return;
     }
 
     for await (const backup of backupsOlderThanRetentionDate) {
