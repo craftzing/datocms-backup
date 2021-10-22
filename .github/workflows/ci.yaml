@@ -2,6 +2,19 @@ name: CI
 on: [push, pull_request]
 
 jobs:
+  runTests:
+    name: 'Run tests'
+    runs-on: ubuntu-latest
+    container: node:16.6-alpine3.14
+    steps:
+      - name: 'Checkout code'
+        uses: actions/checkout@v2
+      - name: 'Install npm deps'
+        run: npm ci
+      - name: 'Build the CLI'
+        run: npm run build
+      - name: 'Run tests'
+        run: npm run tests
   buildDockerImage:
     name: 'Build Docker image'
     runs-on: ubuntu-latest

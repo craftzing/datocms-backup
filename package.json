@@ -7,7 +7,7 @@
   "scripts": {
     "backup": "npm run build && node ./bin/index.js",
     "build": "rm -rf bin && npx tsc",
-    "test": "jest"
+    "tests": "jest"
   },
   "repository": {
     "type": "git",
