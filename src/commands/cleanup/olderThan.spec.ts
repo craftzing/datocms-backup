@@ -1,8 +1,8 @@
 import { DateTime } from 'luxon';
 import { expectOutputToBeCanceled, expectOutputToBeCompleted } from '../../../.jest/utils/output';
-import {fakeConfirmation, output} from '../../output.fake';
+import { fakeConfirmation, output } from '../../output.fake';
 import { client, fakeBackup, fakeErrorWhileGettingBackups } from '../../dato.fake';
-import { BackupEnvironment } from "../../dato";
+import { BackupEnvironment } from '../../dato';
 import { ArgumentDefinition, OptionDefinition } from '../../command';
 import { COMMAND } from './olderThan';
 
@@ -30,6 +30,11 @@ describe('command', () => {
             {
                 flag: 'debug',
                 shortFlag: 'd',
+                description: expect.any(String),
+            },
+            {
+                flag: 'confirm',
+                shortFlag: 'y',
                 description: expect.any(String),
             },
         ]);

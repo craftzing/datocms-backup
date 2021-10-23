@@ -5,3 +5,9 @@ export const DEBUG: OptionDefinition = {
     shortFlag: 'd',
     description: 'Display debugging info',
 }
+
+export const CONFIRM: OptionDefinition = {
+    flag: 'confirm',
+    shortFlag: 'y',
+    description: 'Bypass all confirmation prompts',
+}
