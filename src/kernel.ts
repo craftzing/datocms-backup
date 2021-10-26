@@ -59,7 +59,10 @@ export function createKernel(...commands: Command[]): Kernel {
             return args;
         }, {});
         const opts: Options = input[Object.keys(args).length];
-        const output: Output = createOutput(opts, cmd.helpInformation());
+        const output: Output = createOutput({
+            helpText: cmd.helpInformation(),
+            ...opts,
+        });
 
         return command.handle(args, opts, output);
     }
