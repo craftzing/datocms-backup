@@ -24,7 +24,7 @@ jobs:
         uses: ./.github/actions/build-docker-image
         with:
           version: ${{ steps.tag.outputs.tag }}
-          puh: true
+          push: true
       - name: 'Run Trivy scans'
         uses: ./.github/actions/run-trivy-scans
         with:
