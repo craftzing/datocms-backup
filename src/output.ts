@@ -18,12 +18,13 @@ export type Output = {
 export type OutputOptions = {
     confirm?: boolean
     debug?: boolean
+    helpText: string
 }
 
-export function createOutput(options: OutputOptions, help: string): Output {
+export function createOutput(options: OutputOptions): Output {
     return {
         misconfig(message: string): void {
-            console.log(`error: ${message}`);
+            console.error(`error: ${message}`);
             process.exit(1);
         },
 
@@ -64,7 +65,7 @@ export function createOutput(options: OutputOptions, help: string): Output {
         },
 
         help(): void {
-            console.log(help);
+            console.log(options.helpText);
             process.exit(1);
         },
     };
