@@ -9,9 +9,9 @@ import {
     fakeErrorWhileResolvingPrimaryId,
     fakeErrorWhileCreatingBackup,
 } from '../dato.fake';
-import { COMMAND } from './create';
 import { BackupEnvironmentId } from '../dato';
 import { BackupFailed, RuntimeError } from '../errors/runtimeErrors';
+import * as Command from './create';
 
 jest.mock('../dato', () => ({
     ...jest.requireActual<object>('../dato'),
@@ -26,11 +26,11 @@ function resolveExpectedBackupId(): BackupEnvironmentId {
 
 describe('command', () => {
     it('should have a descriptive name', () => {
-        expect(COMMAND.name).toEqual('create');
+        expect(Command.name).toEqual('create');
     });
 
     it('should have arguments', () => {
-        expect(COMMAND.arguments).toEqual<ArgumentDefinition[]>([
+        expect(Command.args).toEqual<ArgumentDefinition[]>([
             {
                 name: 'environmentId',
                 description: expect.any(String),
@@ -40,7 +40,7 @@ describe('command', () => {
     });
 
     it('should have options', () => {
-        expect(COMMAND.options).toEqual<OptionDefinition[]>([
+        expect(Command.options).toEqual<OptionDefinition[]>([
             {
                 flag: 'debug',
                 shortFlag: 'd',
@@ -49,15 +49,11 @@ describe('command', () => {
         ]);
     });
 
-    it('should not have subcommands', () => {
-        expect(COMMAND.subCommands).toEqual(undefined);
-    });
-
     it('should exit with an error when it failed to resolve the primary environment', async () => {
         fakeErrorWhileResolvingPrimaryId();
 
         try {
-            await COMMAND.handle(
+            await Command.handle(
                 { environmentId: 'primary' },
                 { debug: false },
                 output,
@@ -74,7 +70,7 @@ describe('command', () => {
         fakeSandboxEnvironment();
         const expectedBackupId = resolveExpectedBackupId();
 
-        await COMMAND.handle(
+        await Command.handle(
             { environmentId: 'primary' },
             { debug: false },
             output,
@@ -94,7 +90,7 @@ describe('command', () => {
         const expectedBackupId = resolveExpectedBackupId();
 
         try {
-            await COMMAND.handle(
+            await Command.handle(
                 { environmentId: env.id },
                 { debug: false },
                 output,
@@ -110,7 +106,7 @@ describe('command', () => {
         const env = fakeSandboxEnvironment();
         const expectedBackupId = resolveExpectedBackupId();
 
-        await COMMAND.handle(
+        await Command.handle(
             { environmentId: env.id },
             { debug: false },
             output,

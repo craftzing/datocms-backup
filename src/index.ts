@@ -7,8 +7,8 @@ import * as Cleanup from './commands/cleanup';
 config();
 
 const kernel: Kernel = createKernel(
-    Create.COMMAND,
-    Cleanup.COMMAND,
+    Create,
+    Cleanup,
 );
 
 kernel.boot();

@@ -2,7 +2,7 @@ import { Output } from './output';
 
 export type Command = {
     readonly name: string
-    readonly arguments?: ArgumentDefinition[]
+    readonly args?: ArgumentDefinition[]
     readonly options?: OptionDefinition[]
     readonly handle: Handler
     readonly subCommands?: Command[]

@@ -6,7 +6,7 @@ import { fakeConfirmation, output } from '../../output.fake';
 import { client, fakeBackup, fakeErrorWhileGettingBackups } from '../../dato.fake';
 import { BackupEnvironment } from '../../dato';
 import { ArgumentDefinition, OptionDefinition } from '../../command';
-import { COMMAND } from './olderThan';
+import * as Command from './olderThan';
 
 jest.mock('../../dato', () => ({
     ...jest.requireActual<object>('../../dato'),
@@ -15,11 +15,11 @@ jest.mock('../../dato', () => ({
 
 describe('command', () => {
     it('should have a descriptive name', () => {
-        expect(COMMAND.name).toEqual('older-than');
+        expect(Command.name).toEqual('older-than');
     });
 
     it('should have arguments', () => {
-        expect(COMMAND.arguments).toEqual<ArgumentDefinition[]>([
+        expect(Command.args).toEqual<ArgumentDefinition[]>([
             {
                 name: 'age',
                 description: expect.any(String),
@@ -28,7 +28,7 @@ describe('command', () => {
     });
 
     it('should have options', () => {
-        expect(COMMAND.options).toEqual<OptionDefinition[]>([
+        expect(Command.options).toEqual<OptionDefinition[]>([
             {
                 flag: 'debug',
                 shortFlag: 'd',
@@ -42,10 +42,6 @@ describe('command', () => {
         ]);
     });
 
-    it('should not have subcommands', () => {
-        expect(COMMAND.subCommands).toEqual(undefined);
-    });
-
     const invalidAges = [
         ['nonsense'],
         ['1ymd'],
@@ -54,7 +50,7 @@ describe('command', () => {
 
     it.each(invalidAges)('should throw a misconfig error when the provided age is invalid', async (age: string) => {
         try {
-            await COMMAND.handle(
+            await Command.handle(
                 { age },
                 { debug: false },
                 output,
@@ -69,7 +65,7 @@ describe('command', () => {
         fakeErrorWhileGettingBackups();
 
         try {
-            await COMMAND.handle(
+            await Command.handle(
                 { age: '1d' },
                 { debug: false },
                 output,
@@ -81,7 +77,7 @@ describe('command', () => {
     });
 
     it('can handle cleanup when there are no backups', async () => {
-        await COMMAND.handle(
+        await Command.handle(
             { age: '1w' },
             { debug: false },
             output,
@@ -94,7 +90,7 @@ describe('command', () => {
     it('can handle cleanup when there are no backups older than the retention date', async () => {
         fakeBackup(DateTime.local().minus({ weeks: 1 }).toISO());
 
-        await COMMAND.handle(
+        await Command.handle(
             { age: '2w' },
             { debug: false },
             output,
@@ -107,7 +103,7 @@ describe('command', () => {
     it('does not cleanup backups when confirmation is rejected', async () => {
         fakeBackup(DateTime.local().minus({ days: 3 }).toISO());
 
-        await COMMAND.handle(
+        await Command.handle(
             { age: '2d' },
             { debug: false },
             output,
@@ -126,7 +122,7 @@ describe('command', () => {
         const backupToKeep = fakeBackup(DateTime.local().minus({ months: 1 }).toISO());
         fakeConfirmation();
 
-        await COMMAND.handle(
+        await Command.handle(
             { age: '1m' },
             { debug: false },
             output,
