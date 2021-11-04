@@ -1,6 +1,7 @@
 import * as Commander from 'commander';
 import { Command, ArgumentDefinition, OptionDefinition, Arguments, Options } from './command';
 import { createOutput, Output } from './output';
+import { handle } from './errors/handler';
 
 export type Kernel = {
     readonly boot: () => void
@@ -64,7 +65,7 @@ export function createKernel(...commands: Command[]): Kernel {
             ...opts,
         });
 
-        return command.handle(args, opts, output);
+        return handle(() => command.handle(args, opts, output), output);
     }
 
     return {
