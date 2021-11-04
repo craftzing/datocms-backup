@@ -1,5 +1,7 @@
 import { DateTime } from 'luxon';
 import { expectOutputToBeCanceled, expectOutputToBeCompleted } from '../../../.jest/utils/output';
+import { FailedToStartCleanup, MisconfigurationError } from '../../errors/misconfigurationErrors';
+import { CleanupFailed, RuntimeError } from '../../errors/runtimeErrors';
 import { fakeConfirmation, output } from '../../output.fake';
 import { client, fakeBackup, fakeErrorWhileGettingBackups } from '../../dato.fake';
 import { BackupEnvironment } from '../../dato';
@@ -50,33 +52,32 @@ describe('command', () => {
         ['1Y2H'],
     ];
 
-    // Skipped until we refactor the underlying implementation with custom exceptions...
-    it.skip.each(invalidAges)('should exit with an error when the provided age is invalid', async (age: string) => {
-        await COMMAND.handle(
-            { age },
-            { debug: false },
-            output,
-        );
-
-        expect(output.misconfig).toHaveBeenCalledTimes(1);
-        expect(output.misconfig).toHaveBeenCalledWith(
-            expect.stringContaining('age'),
-        );
+    it.each(invalidAges)('should throw a misconfig error when the provided age is invalid', async (age: string) => {
+        try {
+            await COMMAND.handle(
+                { age },
+                { debug: false },
+                output,
+            );
+        } catch (error) {
+            expect(error).toBeInstanceOf(MisconfigurationError);
+            expect(error).toEqual(FailedToStartCleanup.argumentAgeIsInvalid(age));
+        }
     });
 
     it('should exit with an error when it failed to retrieve all existing backups', async () => {
         fakeErrorWhileGettingBackups();
 
-        await COMMAND.handle(
-            { age: '1d' },
-            { debug: false },
-            output,
-        );
-
-        expect(output.error).toHaveBeenCalledTimes(1);
-        expect(output.error).toHaveBeenCalledWith(
-            expect.stringContaining('Cleanup failed'),
-        );
+        try {
+            await COMMAND.handle(
+                { age: '1d' },
+                { debug: false },
+                output,
+            );
+        } catch (error) {
+            expect(error).toBeInstanceOf(RuntimeError);
+            expect(error).toEqual(CleanupFailed.datoApiReturnedWithAnErrorWhileGettingBackupEnvironments());
+        }
     });
 
     it('can handle cleanup when there are no backups', async () => {

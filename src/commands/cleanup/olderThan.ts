@@ -3,6 +3,8 @@ import { Arguments, Command, Options } from '../../command';
 import { Output } from '../../output';
 import { createClient, BackupEnvironment } from '../../dato';
 import { DEBUG, CONFIRM } from '../../common/options';
+import { FailedToStartCleanup } from '../../errors/misconfigurationErrors';
+import { CleanupFailed } from '../../errors/runtimeErrors';
 
 export const COMMAND: Command = {
     name: 'older-than',
@@ -35,9 +37,10 @@ async function handle(args: OlderThanArguments, options: Options, output: Output
         backups = await client.backups();
 
         output.debug('Existing backups:', backups);
-    } catch (exception) {
-        output.debug(exception);
-        output.error(`Cleanup failed due to an error response from the DatoCMS API.`);
+    } catch (error) {
+        output.debug(error);
+
+        throw CleanupFailed.datoApiReturnedWithAnErrorWhileGettingBackupEnvironments();
     }
 
     const backupsOlderThanRetentionDate = backups.filter((backup: BackupEnvironment): boolean => {
@@ -77,7 +80,7 @@ async function handle(args: OlderThanArguments, options: Options, output: Output
         const durationUnits: string[] = Object.keys(duration.toObject());
 
         if (durationUnits.length === 0) {
-            output.misconfig(`Argument 'age' must be a valid ISO8601 duration string. E.g. "5d", "1w", "P1YT6H", ...`);
+            throw FailedToStartCleanup.argumentAgeIsInvalid(args.age);
         }
 
         const smallestDurationUnit = durationUnits.pop();
@@ -92,11 +95,10 @@ async function handle(args: OlderThanArguments, options: Options, output: Output
             const response = await client.deleteEnvironmentById(backup.id);
 
             output.debug('Deleted backup:', response);
-        } catch (exception) {
-            output.debug(exception);
-            output.error(
-                `Cleanup failed due to an error response from the DatoCMS API while deleting backup '${backup.id}'.`,
-            );
+        } catch (error) {
+            output.debug(error);
+
+            throw CleanupFailed.datoApiReturnedWithAnErrorWhileDeletingBackup(backup);
         }
     }
 }

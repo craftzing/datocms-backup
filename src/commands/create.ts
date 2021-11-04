@@ -3,6 +3,7 @@ import { Output } from '../output';
 import { createClient, BackupEnvironmentId, Dato } from '../dato';
 import { Command, Arguments, Options } from '../command';
 import { DEBUG } from '../common/options';
+import { BackupFailed } from '../errors/runtimeErrors';
 
 const PRIMARY_ENV_ALIAS = 'primary';
 
@@ -52,7 +53,8 @@ async function resolveEnvironmentId(output: Output, client: Dato, environmentId:
         return primaryEnvironmentId;
     } catch (exception) {
         output.debug(exception);
-        output.error(`Failed to resolve the primary environment due to an error response from the DatoCMS API.`);
+
+        throw BackupFailed.datoApiRespondedWithAnErrorWhileResolvingPrimaryEnvironment();
     }
 }
 
@@ -67,7 +69,8 @@ async function createBackupForEnvironment(output: Output, client: Dato, environm
         output.debug(backup);
     } catch (exception) {
         output.debug(exception);
-        output.error(`Backup "${backupId}" failed due to an error response from the DatoCMS API.`);
+
+        throw BackupFailed.datoApiRespondedWithAnErrorWhileCreatingBackup(backupId);
     }
 
     return backupId;

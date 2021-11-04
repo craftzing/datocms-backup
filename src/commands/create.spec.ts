@@ -10,13 +10,15 @@ import {
     fakeErrorWhileCreatingBackup,
 } from '../dato.fake';
 import { COMMAND } from './create';
+import { BackupEnvironmentId } from '../dato';
+import { BackupFailed, RuntimeError } from '../errors/runtimeErrors';
 
 jest.mock('../dato', () => ({
     ...jest.requireActual<object>('../dato'),
     createClient: jest.fn(() => client),
 }));
 
-function resolveExpectedBackupId(): string {
+function resolveExpectedBackupId(): BackupEnvironmentId {
     const now = freezeNow().toFormat('yyyy-LL-dd');
 
     return `backup-${now}`;
@@ -54,16 +56,16 @@ describe('command', () => {
     it('should exit with an error when it failed to resolve the primary environment', async () => {
         fakeErrorWhileResolvingPrimaryId();
 
-        await COMMAND.handle(
-            { environmentId: 'primary' },
-            { debug: false },
-            output,
-        );
-
-        expect(output.error).toHaveBeenCalledTimes(1);
-        expect(output.error).toHaveBeenCalledWith(
-            expect.stringContaining('primary environment'),
-        );
+        try {
+            await COMMAND.handle(
+                { environmentId: 'primary' },
+                { debug: false },
+                output,
+            );
+        } catch (error) {
+            expect(error).toBeInstanceOf(RuntimeError);
+            expect(error).toEqual(BackupFailed.datoApiRespondedWithAnErrorWhileResolvingPrimaryEnvironment())
+        }
     });
 
     it('can create backups for the primary environment', async () => {
@@ -91,16 +93,16 @@ describe('command', () => {
         fakeErrorWhileCreatingBackup();
         const expectedBackupId = resolveExpectedBackupId();
 
-        await COMMAND.handle(
-            { environmentId: env.id },
-            { debug: false },
-            output,
-        );
-
-        expect(output.error).toHaveBeenCalledTimes(1);
-        expect(output.error).toHaveBeenCalledWith(
-            expect.stringContaining(expectedBackupId),
-        );
+        try {
+            await COMMAND.handle(
+                { environmentId: env.id },
+                { debug: false },
+                output,
+            );
+        } catch (error) {
+            expect(error).toBeInstanceOf(RuntimeError);
+            expect(error).toEqual(BackupFailed.datoApiRespondedWithAnErrorWhileCreatingBackup(expectedBackupId));
+        }
     });
 
     it('can create backups for any existing environment', async () => {

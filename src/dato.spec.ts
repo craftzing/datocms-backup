@@ -1,17 +1,37 @@
 import { SiteClient } from 'datocms-client';
+import { CannotInitialiseDatoClient } from './errors/misconfigurationErrors';
 import { createClient, Dato, Environment } from './dato';
 import { siteClient, fakePrimaryEnvironment, fakeBackup, fakeSandboxEnvironment } from './dato.fake';
+
+const DATOCMS_BACKUP_API_TOKEN = 'some-fake-api-token';
 
 jest.mock('datocms-client', () => ({
     ...jest.requireActual<object>('datocms-client'),
     SiteClient: jest.fn(() => siteClient),
 }));
 
+beforeEach(() => {
+    process.env = {
+        DATOCMS_BACKUP_API_TOKEN,
+    };
+});
+
 describe('client', () => {
+    it('throws a misconfig error when the DATOCMS_BACKUP_API_TOKEN env variable is missing', (): void => {
+        process.env = {};
+
+        try {
+            createClient();
+        } catch (error) {
+            expect(error).toBeInstanceOf(CannotInitialiseDatoClient);
+            expect(error).toEqual(CannotInitialiseDatoClient.missingApiToken());
+        }
+    });
+
     it('can be created with the appropriate API token', (): void => {
         createClient();
 
-        expect(SiteClient).toHaveBeenCalledWith(process.env.DATOCMS_BACKUP_API_TOKEN);
+        expect(SiteClient).toHaveBeenCalledWith(DATOCMS_BACKUP_API_TOKEN);
     });
 
     it("returns an empty array when getting backups when there aren't any", async () => {
