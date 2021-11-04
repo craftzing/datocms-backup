@@ -1,4 +1,5 @@
 import { SiteClient } from 'datocms-client';
+import { CannotInitialiseDatoClient } from './errors/misconfiguration';
 
 export type Environment = {
     readonly id: string
@@ -22,7 +23,17 @@ export type Dato = {
 }
 
 export function createClient(): Dato {
-    const siteClient = new SiteClient(process.env.DATOCMS_BACKUP_API_TOKEN);
+    const siteClient = new SiteClient(getApiToken());
+
+    function getApiToken(): string {
+        const apiToken = process.env.DATOCMS_BACKUP_API_TOKEN;
+
+        if (apiToken) {
+            return apiToken;
+        }
+
+        throw CannotInitialiseDatoClient.missingApiToken();
+    }
 
     return {
         async backups(): Promise<BackupEnvironment[]> {
