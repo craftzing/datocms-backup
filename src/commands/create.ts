@@ -1,11 +1,16 @@
 import { DateTime } from 'luxon';
 import { Output } from '../output';
 import { createClient, BackupEnvironmentId } from '../dato';
-import { Arguments, Options, OptionDefinition, ArgumentDefinition} from '../command';
+import { Arguments, Options, OptionDefinition, ArgumentDefinition } from '../command';
 import { DEBUG } from '../common/options';
 import { BackupFailed } from '../errors/runtimeErrors';
 
 const PRIMARY_ENV_ALIAS = 'primary';
+
+export enum Destination {
+    Dato = 'dato',
+    S3 = 's3',
+}
 
 export const name: string = 'create';
 
@@ -19,20 +24,34 @@ export const args: ArgumentDefinition[] = [
 
 export const options: OptionDefinition[] = [
     DEBUG,
-]
+    {
+        flag: 'destination',
+        description: 'Destination for the backup',
+        choices: Object.values(Destination),
+        defaultValue: Destination.Dato,
+    },
+];
 
-type CreateArguments = Arguments & {
+export type CreateArguments = Arguments & {
     environmentId: string
 }
 
-type CreateOptions = Options & {
+export type CreateOptions = Options & {
     debug: boolean
+    destination: Destination
 }
 
 export async function handle(args: CreateArguments, options: CreateOptions, output: Output): Promise<void> {
     const client = createClient();
     const environmentIdToBackup = await resolveEnvironmentId();
-    const backupId = await createBackupForEnvironment();
+    const backupId: BackupEnvironmentId = `backup-${DateTime.local().toFormat('yyyy-LL-dd')}`;
+
+    output.line(`Creating backup for "${environmentIdToBackup}" environment on ${options.destination}...`, '⏳');
+
+    await {
+        [Destination.Dato]: createBackupOnDato,
+        [Destination.S3]: createBackupOnS3,
+    }[options.destination]();
 
     output.completed(`Backup "${backupId}" completed.`);
 
@@ -56,11 +75,7 @@ export async function handle(args: CreateArguments, options: CreateOptions, outp
         }
     }
 
-    async function createBackupForEnvironment(): Promise<string> {
-        const backupId: BackupEnvironmentId = `backup-${DateTime.local().toFormat('yyyy-LL-dd')}`;
-
-        output.line(`Creating backup for "${environmentIdToBackup}" environment...`, '⏳');
-
+    async function createBackupOnDato(): Promise<void> {
         try {
             const backup = await client.forkEnvironment(environmentIdToBackup, backupId);
 
@@ -70,7 +85,9 @@ export async function handle(args: CreateArguments, options: CreateOptions, outp
 
             throw BackupFailed.datoApiRespondedWithAnErrorWhileCreatingBackup(backupId);
         }
+    }
 
-        return backupId;
+    async function createBackupOnS3(): Promise<void> {
+
     }
 }

@@ -49,7 +49,14 @@ export function createKernel(...commands: Command[]): Kernel {
             flags = `${flags} <value>`;
         }
 
-        cmd.option(flags, option.description, option.defaultValue || undefined);
+        const opt = cmd.createOption(flags, option.description)
+            .default(option.defaultValue || undefined);
+
+        if (option.hasOwnProperty('choices')) {
+            opt.choices(option.choices);
+        }
+
+        cmd.addOption(opt);
     }
 
     function mapInputToCommandHandler(cmd: Commander.Command, command: Command, ...input: any[]): Promise<void> {
