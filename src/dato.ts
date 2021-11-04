@@ -1,5 +1,5 @@
 import { SiteClient } from 'datocms-client';
-import { CannotInitialiseDatoClient } from './errors/misconfiguration';
+import { CannotInitialiseDatoClient } from './errors/misconfigurationErrors';
 
 export type Environment = {
     readonly id: string

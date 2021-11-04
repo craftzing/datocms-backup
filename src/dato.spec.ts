@@ -1,5 +1,5 @@
 import { SiteClient } from 'datocms-client';
-import { CannotInitialiseDatoClient } from './errors/misconfiguration';
+import { CannotInitialiseDatoClient } from './errors/misconfigurationErrors';
 import { createClient, Dato, Environment } from './dato';
 import { siteClient, fakePrimaryEnvironment, fakeBackup, fakeSandboxEnvironment } from './dato.fake';
 

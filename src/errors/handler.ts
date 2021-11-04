@@ -1,6 +1,6 @@
 import { Output } from '../output';
-import { MisconfigurationError } from './misconfigurationError';
-import { RuntimeError } from './runtimeError';
+import { MisconfigurationError } from './misconfigurationErrors';
+import { RuntimeError } from './runtimeErrors';
 
 export async function handle(process: Function, output: Output): Promise<void> {
     try {

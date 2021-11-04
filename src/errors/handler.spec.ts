@@ -1,7 +1,7 @@
 import { handle } from './handler';
 import { output } from '../output.fake';
-import { MisconfigurationError } from './misconfigurationError';
-import { RuntimeError } from './runtimeError';
+import { MisconfigurationError } from './misconfigurationErrors';
+import { RuntimeError } from './runtimeErrors';
 
 describe('error handler', () => {
     it('can handle misconfiguration errors', async () => {
