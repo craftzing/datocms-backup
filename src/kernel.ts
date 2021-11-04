@@ -45,6 +45,10 @@ export function createKernel(...commands: Command[]): Kernel {
             flags = `-${option.shortFlag}, ${flags}`;
         }
 
+        if (option.hasOwnProperty('defaultValue')) {
+            flags = `${flags} <value>`;
+        }
+
         cmd.option(flags, option.description, option.defaultValue || undefined);
     }
 
