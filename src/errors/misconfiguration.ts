@@ -10,3 +10,11 @@ export class CannotInitialiseDatoClient extends Misconfiguration {
         );
     }
 }
+
+export class FailedToStartCleanup extends Misconfiguration {
+    static argumentAgeIsInvalid(age: string): FailedToStartCleanup {
+        return new FailedToStartCleanup(
+            `Argument "age" must be a valid ISO8601 duration string (e.g. "5d", "1w", "P1YT6H", ...). Got "${age}".`,
+        );
+    }
+}
