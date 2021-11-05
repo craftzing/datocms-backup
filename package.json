@@ -29,6 +29,7 @@
   "dependencies": {
     "commander": "^8.2.0",
     "datocms-client": "^3.4.18",
+    "dotenv": "^10.0.0",
     "inquirer": "^8.2.0",
     "luxon": "^2.0.2"
   },
