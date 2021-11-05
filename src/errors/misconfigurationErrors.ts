@@ -2,9 +2,9 @@ export class MisconfigurationError extends Error {
     //
 }
 
-export class CannotInitialiseDatoClient extends MisconfigurationError {
-    static missingApiToken(): CannotInitialiseDatoClient {
-        return new CannotInitialiseDatoClient(
+export class CannotCreateDatoClient extends MisconfigurationError {
+    static missingApiToken(): CannotCreateDatoClient {
+        return new CannotCreateDatoClient(
             'Please make sure to provide a valid DatoCMS API token by setting ' +
             'a DATOCMS_BACKUP_API_TOKEN environment variable.',
         );

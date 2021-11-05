@@ -1,5 +1,5 @@
 import { SiteClient } from 'datocms-client';
-import { CannotInitialiseDatoClient } from './errors/misconfigurationErrors';
+import { CannotCreateDatoClient } from './errors/misconfigurationErrors';
 import { createClient, Dato, Environment } from './dato';
 import { siteClient, fakePrimaryEnvironment, fakeBackup, fakeSandboxEnvironment } from './dato.fake';
 
@@ -23,8 +23,8 @@ describe('client', () => {
         try {
             createClient();
         } catch (error) {
-            expect(error).toBeInstanceOf(CannotInitialiseDatoClient);
-            expect(error).toEqual(CannotInitialiseDatoClient.missingApiToken());
+            expect(error).toBeInstanceOf(CannotCreateDatoClient);
+            expect(error).toEqual(CannotCreateDatoClient.missingApiToken());
         }
     });
 

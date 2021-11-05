@@ -1,5 +1,5 @@
 import { SiteClient } from 'datocms-client';
-import { CannotInitialiseDatoClient } from './errors/misconfigurationErrors';
+import { CannotCreateDatoClient } from './errors/misconfigurationErrors';
 
 export type Environment = {
     readonly id: string
@@ -32,7 +32,7 @@ export function createClient(): Dato {
             return apiToken;
         }
 
-        throw CannotInitialiseDatoClient.missingApiToken();
+        throw CannotCreateDatoClient.missingApiToken();
     }
 
     return {
