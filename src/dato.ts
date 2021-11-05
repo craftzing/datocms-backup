@@ -20,19 +20,20 @@ export type Dato = {
     primaryEnvironmentId: () => Promise<string>
     forkEnvironment: (environmentId: string, forkId: BackupEnvironmentId) => Promise<Environment>
     deleteEnvironmentById: (environmentId: BackupEnvironmentId) => Promise<BackupEnvironment>
+    dataDump: () => Promise<string>
 }
 
 export function createClient(): Dato {
-    const siteClient = new SiteClient(getApiToken());
+    const siteClient: SiteClient = createSiteClient();
 
-    function getApiToken(): string {
+    function createSiteClient(): SiteClient {
         const apiToken = process.env.DATOCMS_BACKUP_API_TOKEN;
 
-        if (apiToken) {
-            return apiToken;
+        if (! apiToken) {
+            throw CannotCreateDatoClient.missingApiToken();
         }
 
-        throw CannotCreateDatoClient.missingApiToken();
+        return new SiteClient(apiToken);
     }
 
     return {
@@ -54,6 +55,12 @@ export function createClient(): Dato {
 
         async deleteEnvironmentById(environmentId: BackupEnvironmentId): Promise<BackupEnvironment> {
             return siteClient.environments.destroy(environmentId);
+        },
+
+        async dataDump(): Promise<string> {
+            const response = await siteClient.items.all({}, { allPages: true });
+
+            return JSON.stringify(response, null, 2);
         },
     }
 }

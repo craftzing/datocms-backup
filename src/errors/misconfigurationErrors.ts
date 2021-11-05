@@ -11,6 +11,20 @@ export class CannotCreateDatoClient extends MisconfigurationError {
     }
 }
 
+export class CannotCreateS3Storage extends MisconfigurationError {
+    static missingAccessKeyId(): CannotCreateS3Storage {
+        return new CannotCreateS3Storage(
+            'To use the S3 storage, please provide a DATOCMS_BACKUP_AWS_ACCESS_KEY_ID environment variable.',
+        );
+    }
+
+    static missingAccessKeySecret(): CannotCreateS3Storage {
+        return new CannotCreateS3Storage(
+            'To use the S3 storage, please provide a DATOCMS_BACKUP_AWS_ACCESS_KEY_SECRET environment variable.',
+        );
+    }
+}
+
 export class FailedToStartCleanup extends MisconfigurationError {
     static argumentAgeIsInvalid(age: string): FailedToStartCleanup {
         return new FailedToStartCleanup(

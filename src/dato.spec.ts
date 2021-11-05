@@ -3,20 +3,19 @@ import { CannotCreateDatoClient } from './errors/misconfigurationErrors';
 import { createClient, Dato, Environment } from './dato';
 import { siteClient, fakePrimaryEnvironment, fakeBackup, fakeSandboxEnvironment } from './dato.fake';
 
-const DATOCMS_BACKUP_API_TOKEN = 'some-fake-api-token';
-
 jest.mock('datocms-client', () => ({
-    ...jest.requireActual<object>('datocms-client'),
     SiteClient: jest.fn(() => siteClient),
 }));
 
-beforeEach(() => {
-    process.env = {
-        DATOCMS_BACKUP_API_TOKEN,
-    };
-});
+const DATOCMS_BACKUP_API_TOKEN = 'some-fake-api-token';
 
 describe('client', () => {
+    beforeEach(() => {
+        process.env = {
+            DATOCMS_BACKUP_API_TOKEN,
+        };
+    });
+
     it('throws a misconfig error when the DATOCMS_BACKUP_API_TOKEN env variable is missing', (): void => {
         process.env = {};
 

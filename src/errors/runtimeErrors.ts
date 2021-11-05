@@ -43,3 +43,19 @@ export class CleanupFailed extends RuntimeError {
         );
     }
 }
+
+export class DumpFailed extends RuntimeError {
+    static datoApiRespondedWithAnErrorWhileGettingDataDump(originalError: Error): DumpFailed {
+        return new DumpFailed(
+            `Dump failed due to an error response from the DatoCMS API while getting the data dump.`,
+            originalError,
+        );
+    }
+
+    static s3ApiRespondedWithAnErrorWhileUploadingData(originalError: Error): DumpFailed {
+        return new DumpFailed(
+            `Dump failed due to an error response from the AWS S3 API while uploading data.`,
+            originalError,
+        );
+    }
+}

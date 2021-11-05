@@ -1,26 +1,26 @@
 import * as faker from 'faker';
 import { DateTime } from 'luxon';
-import {Dato, BackupEnvironment, BackupEnvironmentId, Environment, isBackupEnvironment} from './dato';
-
-beforeEach(() => {
-    jest.clearAllMocks();
-    reset();
-});
+import { Dato, BackupEnvironment, BackupEnvironmentId, Environment, isBackupEnvironment } from './dato';
 
 const PRIMARY_ENV_ID = 'main';
 let environments: Environment[] = [];
-let errors: {
+
+export let errors: {
     [name: string]: Error | undefined
 } = {};
 
-function reset(): void {
+export const dataDump: string = 'All DatoCMS data...';
+
+beforeEach(() => {
+    jest.clearAllMocks();
     environments = [];
     errors = {
         primaryEnvironmentId: undefined,
         backups: undefined,
         forkEnvironment: undefined,
+        dataDump: undefined,
     };
-}
+});
 
 export function fakeErrorWhileResolvingPrimaryId(): void {
     errors.primaryEnvironmentId = new Error('Faked missing primary environment.');
@@ -32,6 +32,10 @@ export function fakeErrorWhileGettingBackups(): void {
 
 export function fakeErrorWhileCreatingBackup(): void {
     errors.forkEnvironment = new Error('Faked an error while creating a backup.');
+}
+
+export function fakeErrorWhileGettingDataDump(): void {
+    errors.dataDump = new Error('Faked an error while creating a backup dump.');
 }
 
 function fakeEnvironments(...envs: Environment[]): void {
@@ -141,5 +145,13 @@ export const client: Dato = {
 
     deleteEnvironmentById: jest.fn(async (environmentId: BackupEnvironmentId): Promise<BackupEnvironment> => {
         return await siteClient.environments.destroy(environmentId);
+    }),
+
+    dataDump: jest.fn(async (): Promise<string> => {
+        if (errors.dataDump) {
+            throw errors.dataDump;
+        }
+
+        return Promise.resolve(dataDump);
     }),
 };
