@@ -72,7 +72,7 @@ describe('command', () => {
             );
         } catch (error) {
             expect(error).toBeInstanceOf(RuntimeError);
-            expect(error).toEqual(CleanupFailed.datoApiReturnedWithAnErrorWhileGettingBackupEnvironments());
+            expect(error).toBeInstanceOf(CleanupFailed);
         }
     });
 

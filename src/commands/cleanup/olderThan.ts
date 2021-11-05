@@ -37,9 +37,7 @@ export async function handle(args: OlderThanArguments, options: Options, output:
 
         output.debug('Existing backups:', backups);
     } catch (error) {
-        output.debug(error);
-
-        throw CleanupFailed.datoApiReturnedWithAnErrorWhileGettingBackupEnvironments();
+        throw CleanupFailed.datoApiReturnedWithAnErrorWhileGettingBackupEnvironments(error);
     }
 
     const backupsOlderThanRetentionDate = backups.filter((backup: BackupEnvironment): boolean => {
@@ -95,9 +93,7 @@ export async function handle(args: OlderThanArguments, options: Options, output:
 
             output.debug('Deleted backup:', response);
         } catch (error) {
-            output.debug(error);
-
-            throw CleanupFailed.datoApiReturnedWithAnErrorWhileDeletingBackup(backup);
+            throw CleanupFailed.datoApiReturnedWithAnErrorWhileDeletingBackup(backup, error);
         }
     }
 }

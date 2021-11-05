@@ -3,11 +3,11 @@ import { ArgumentDefinition, OptionDefinition } from '../command';
 import { output } from '../output.fake';
 import {
     client,
-    fakePrimaryEnvironment,
     fakeBackup,
-    fakeSandboxEnvironment,
-    fakeErrorWhileResolvingPrimaryId,
     fakeErrorWhileCreatingBackup,
+    fakeErrorWhileResolvingPrimaryId,
+    fakePrimaryEnvironment,
+    fakeSandboxEnvironment,
 } from '../dato.fake';
 import { BackupEnvironmentId } from '../dato';
 import { BackupFailed, RuntimeError } from '../errors/runtimeErrors';
@@ -25,6 +25,10 @@ function resolveExpectedBackupId(): BackupEnvironmentId {
 }
 
 describe('command', () => {
+    const defaultOptions: Command.CreateOptions = {
+        debug: false,
+    };
+
     it('should have a descriptive name', () => {
         expect(Command.name).toEqual('create');
     });
@@ -55,12 +59,12 @@ describe('command', () => {
         try {
             await Command.handle(
                 { environmentId: 'primary' },
-                { debug: false },
+                defaultOptions,
                 output,
             );
         } catch (error) {
             expect(error).toBeInstanceOf(RuntimeError);
-            expect(error).toEqual(BackupFailed.datoApiRespondedWithAnErrorWhileResolvingPrimaryEnvironment())
+            expect(error).toBeInstanceOf(BackupFailed);
         }
     });
 
@@ -72,7 +76,7 @@ describe('command', () => {
 
         await Command.handle(
             { environmentId: 'primary' },
-            { debug: false },
+            defaultOptions,
             output,
         );
 
@@ -92,12 +96,12 @@ describe('command', () => {
         try {
             await Command.handle(
                 { environmentId: env.id },
-                { debug: false },
+                defaultOptions,
                 output,
             );
         } catch (error) {
             expect(error).toBeInstanceOf(RuntimeError);
-            expect(error).toEqual(BackupFailed.datoApiRespondedWithAnErrorWhileCreatingBackup(expectedBackupId));
+            expect(error).toBeInstanceOf(BackupFailed);
         }
     });
 
@@ -108,7 +112,7 @@ describe('command', () => {
 
         await Command.handle(
             { environmentId: env.id },
-            { debug: false },
+            defaultOptions,
             output,
         );
 
