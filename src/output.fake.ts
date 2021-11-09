@@ -15,6 +15,7 @@ export const output: Output = {
 
     debug: jest.fn((data: any): void => {}),
     error: jest.fn((message: string): void => {}),
+    warn: jest.fn((message: string): void => {}),
     help: jest.fn((): void => {}),
 
     line(message: string, icon: string | undefined): void {},
