@@ -3,7 +3,7 @@ import { ArgumentDefinition, OptionDefinition, Options } from '../command';
 import { BackupEnvironmentId } from '../dato';
 import { Driver } from '../storage';
 import { storage, errors as storageErrors, fakeErrorWhileUploadingToStorage } from '../storage.fake';
-import { client, errors as datoErrors, dataDump, fakeErrorWhileGettingDataDump } from '../dato.fake';
+import * as DatoFake from '../dato.fake';
 import { output } from '../output.fake';
 import { DumpFailed } from '../errors/runtimeErrors';
 import * as Command from './dump';
@@ -12,7 +12,7 @@ let storageDriver: string = undefined;
 
 jest.mock('../dato', () => ({
     ...jest.requireActual<object>('../dato'),
-    createClient: jest.fn(() => client),
+    createClient: jest.fn(() => DatoFake.client),
 }));
 
 jest.mock('../storage', () => ({
@@ -38,6 +38,11 @@ describe('command', () => {
     const defaultOptions: Options = {
         debug: false,
     };
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        DatoFake.reset();
+    });
 
     it('should have a descriptive name', () => {
         expect(Command.name).toEqual('dump');
@@ -70,13 +75,13 @@ describe('command', () => {
     });
 
     it('fails when it could not fetch data from DatoCMS', async () => {
-        fakeErrorWhileGettingDataDump();
+        DatoFake.throwErrorWhileGettingDataDump();
 
         try {
             await Command.handle(args, defaultOptions, output);
         } catch (error) {
             expect(error).toBeInstanceOf(DumpFailed);
-            expect(error.originalError).toEqual(datoErrors.dataDump);
+            expect(error.originalError).toEqual(DatoFake.errors.dataDump);
         }
     });
 
@@ -99,6 +104,6 @@ describe('command', () => {
 
         expect(storageDriver).toEqual(args.storage);
         expect(storage.upload).toHaveBeenCalledTimes(1);
-        expect(storage.upload).toHaveBeenCalledWith(expectedPath, dataDump);
+        expect(storage.upload).toHaveBeenCalledWith(expectedPath, DatoFake.dataDump);
     });
 });

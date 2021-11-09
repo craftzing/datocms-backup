@@ -9,10 +9,7 @@ export let errors: {
     [name: string]: Error | undefined
 } = {};
 
-export const dataDump: string = 'All DatoCMS data...';
-
-beforeEach(() => {
-    jest.clearAllMocks();
+export function reset(): void {
     environments = [];
     errors = {
         primaryEnvironmentId: undefined,
@@ -20,21 +17,21 @@ beforeEach(() => {
         forkEnvironment: undefined,
         dataDump: undefined,
     };
-});
+}
 
-export function fakeErrorWhileResolvingPrimaryId(): void {
+export function throwErrorWhileResolvingPrimaryId(): void {
     errors.primaryEnvironmentId = new Error('Faked missing primary environment.');
 }
 
-export function fakeErrorWhileGettingBackups(): void {
+export function throwErrorWhileGettingBackups(): void {
     errors.backups = new Error('Faked an error while getting backups.');
 }
 
-export function fakeErrorWhileCreatingBackup(): void {
+export function throwErrorWhileCreatingBackup(): void {
     errors.forkEnvironment = new Error('Faked an error while creating a backup.');
 }
 
-export function fakeErrorWhileGettingDataDump(): void {
+export function throwErrorWhileGettingDataDump(): void {
     errors.dataDump = new Error('Faked an error while creating a backup dump.');
 }
 
@@ -42,7 +39,7 @@ function fakeEnvironments(...envs: Environment[]): void {
     environments = environments.concat(envs);
 }
 
-export function fakePrimaryEnvironment(): Environment {
+export function primaryEnvironment(): Environment {
     const env = {
         id: PRIMARY_ENV_ID,
         meta: {
@@ -56,7 +53,7 @@ export function fakePrimaryEnvironment(): Environment {
     return env;
 }
 
-export function fakeBackup(isoBackupDate?: string): BackupEnvironment {
+export function backup(isoBackupDate?: string): BackupEnvironment {
     isoBackupDate = isoBackupDate || faker.date.past();
     const backupDate = DateTime.fromISO(isoBackupDate).toFormat('yyyy-LL-dd');
     const backupId: BackupEnvironmentId = `backup-${backupDate}`;
@@ -73,7 +70,7 @@ export function fakeBackup(isoBackupDate?: string): BackupEnvironment {
     return env;
 }
 
-export function fakeSandboxEnvironment(id?: string): Environment {
+export function sandboxEnvironment(id?: string): Environment {
     const env = {
         id: id ?? faker.lorem.word(),
         meta: {
@@ -87,14 +84,27 @@ export function fakeSandboxEnvironment(id?: string): Environment {
     return env;
 }
 
+const datoItems = {
+    key: 'All DatoCMS data...',
+};
+export const dataDump: string = JSON.stringify(datoItems, null, 2);
+export const imgixHost = 'some.fake.imgix.host.com';
 export const siteClient = {
+    site: {
+        find() {
+            return {
+                imgixHost,
+            };
+        },
+    },
+
     environments: {
         all(): Promise<Environment[]> {
             return Promise.resolve(environments);
         },
 
         fork: jest.fn((environmentId: string, { id }: { id: BackupEnvironmentId }): Promise<Environment> => {
-            const fork = fakeSandboxEnvironment(id);
+            const fork = sandboxEnvironment(id);
 
             return Promise.resolve(fork);
         }),
@@ -113,6 +123,16 @@ export const siteClient = {
 
             return Promise.resolve(deletedEnvironment);
         }),
+    },
+
+    items: {
+        all: jest.fn(() => Promise.resolve(datoItems)),
+    },
+
+    uploads: {
+        all: jest.fn(() => Promise.resolve([
+            { path: faker.system.filePath() },
+        ])),
     },
 };
 
@@ -138,9 +158,7 @@ export const client: Dato = {
             throw errors.forkEnvironment;
         }
 
-        const backup = fakeBackup();
-
-        return Promise.resolve(backup);
+        return Promise.resolve(backup());
     }),
 
     deleteEnvironmentById: jest.fn(async (environmentId: BackupEnvironmentId): Promise<BackupEnvironment> => {
@@ -153,5 +171,9 @@ export const client: Dato = {
         }
 
         return Promise.resolve(dataDump);
+    }),
+
+    assetURIs: jest.fn(async (): Promise<Array<string>> => {
+        return [];
     }),
 };
