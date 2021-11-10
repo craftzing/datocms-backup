@@ -14,7 +14,7 @@ export function createKernel(...commands: Command[]): Kernel {
 
     function registerCommand(command: Command, cli: Commander.Command): void {
         const cmd = cli.command(command.name);
-        const argumentDefinitions = command.arguments ?? [];
+        const argumentDefinitions = command.args ?? [];
         const optionDefinitions = command.options ?? [];
         const subCommandDefinitions = command.subCommands ?? [];
 
@@ -45,11 +45,22 @@ export function createKernel(...commands: Command[]): Kernel {
             flags = `-${option.shortFlag}, ${flags}`;
         }
 
-        cmd.option(flags, option.description, option.defaultValue || undefined);
+        if (option.hasOwnProperty('defaultValue')) {
+            flags = `${flags} <value>`;
+        }
+
+        const opt = cmd.createOption(flags, option.description)
+            .default(option.defaultValue || undefined);
+
+        if (option.hasOwnProperty('choices')) {
+            opt.choices(option.choices);
+        }
+
+        cmd.addOption(opt);
     }
 
     function mapInputToCommandHandler(cmd: Commander.Command, command: Command, ...input: any[]): Promise<void> {
-        const argumentDefinitions = command.arguments ?? [];
+        const argumentDefinitions = command.args ?? [];
         const args = argumentDefinitions.reduce((
             args: Arguments,
             arg: ArgumentDefinition,

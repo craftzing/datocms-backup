@@ -1,31 +1,30 @@
 import { DateTime, Duration } from 'luxon';
-import { Arguments, Command, Options } from '../../command';
+import { ArgumentDefinition, Arguments, Command, OptionDefinition, Options } from '../../command';
 import { Output } from '../../output';
 import { createClient, BackupEnvironment } from '../../dato';
 import { DEBUG, CONFIRM } from '../../common/options';
 import { FailedToStartCleanup } from '../../errors/misconfigurationErrors';
 import { CleanupFailed } from '../../errors/runtimeErrors';
 
-export const COMMAND: Command = {
-    name: 'older-than',
-    arguments: [
-        {
-            name: 'age',
-            description: 'An ISO8601 duration string. E.g. "5d", "1w", "P1YT6H", ...',
-        },
-    ],
-    options: [
-        DEBUG,
-        CONFIRM,
-    ],
-    handle,
-}
+export const name: string = 'older-than';
+
+export const args: ArgumentDefinition[] = [
+    {
+        name: 'age',
+        description: 'An ISO8601 duration string. E.g. "5d", "1w", "P1YT6H", ...',
+    },
+];
+
+export const options: OptionDefinition[] = [
+    DEBUG,
+    CONFIRM,
+];
 
 type OlderThanArguments = Arguments & {
     age: string
 }
 
-async function handle(args: OlderThanArguments, options: Options, output: Output): Promise<void> {
+export async function handle(args: OlderThanArguments, options: Options, output: Output): Promise<void> {
     const client = createClient();
     const retentionDate = retentionDateFromUnitArgument();
     const format = DateTime.DATETIME_MED_WITH_SECONDS;
@@ -38,9 +37,7 @@ async function handle(args: OlderThanArguments, options: Options, output: Output
 
         output.debug('Existing backups:', backups);
     } catch (error) {
-        output.debug(error);
-
-        throw CleanupFailed.datoApiReturnedWithAnErrorWhileGettingBackupEnvironments();
+        throw CleanupFailed.datoApiReturnedWithAnErrorWhileGettingBackupEnvironments(error);
     }
 
     const backupsOlderThanRetentionDate = backups.filter((backup: BackupEnvironment): boolean => {
@@ -96,9 +93,7 @@ async function handle(args: OlderThanArguments, options: Options, output: Output
 
             output.debug('Deleted backup:', response);
         } catch (error) {
-            output.debug(error);
-
-            throw CleanupFailed.datoApiReturnedWithAnErrorWhileDeletingBackup(backup);
+            throw CleanupFailed.datoApiReturnedWithAnErrorWhileDeletingBackup(backup, error);
         }
     }
 }

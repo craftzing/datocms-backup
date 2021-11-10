@@ -1,30 +1,32 @@
 import { SiteClient } from 'datocms-client';
-import { CannotInitialiseDatoClient } from './errors/misconfigurationErrors';
+import { CannotCreateDatoClient } from './errors/misconfigurationErrors';
 import { createClient, Dato, Environment } from './dato';
-import { siteClient, fakePrimaryEnvironment, fakeBackup, fakeSandboxEnvironment } from './dato.fake';
-
-const DATOCMS_BACKUP_API_TOKEN = 'some-fake-api-token';
+import * as DatoFake from './dato.fake';
 
 jest.mock('datocms-client', () => ({
-    ...jest.requireActual<object>('datocms-client'),
-    SiteClient: jest.fn(() => siteClient),
+    SiteClient: jest.fn(() => DatoFake.siteClient),
 }));
 
-beforeEach(() => {
-    process.env = {
-        DATOCMS_BACKUP_API_TOKEN,
-    };
-});
-
 describe('client', () => {
+    const DATOCMS_BACKUP_API_TOKEN = 'some-fake-api-token';
+    const DATOCMS_BACKUP_ASSETS_PROXY = 'some-fake-assets.proxy/content-assets';
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        DatoFake.reset();
+        process.env = {
+            DATOCMS_BACKUP_API_TOKEN,
+        };
+    });
+
     it('throws a misconfig error when the DATOCMS_BACKUP_API_TOKEN env variable is missing', (): void => {
         process.env = {};
 
         try {
             createClient();
         } catch (error) {
-            expect(error).toBeInstanceOf(CannotInitialiseDatoClient);
-            expect(error).toEqual(CannotInitialiseDatoClient.missingApiToken());
+            expect(error).toBeInstanceOf(CannotCreateDatoClient);
+            expect(error).toEqual(CannotCreateDatoClient.missingApiToken());
         }
     });
 
@@ -36,8 +38,8 @@ describe('client', () => {
 
     it("returns an empty array when getting backups when there aren't any", async () => {
         const client: Dato = createClient();
-        fakePrimaryEnvironment();
-        fakeSandboxEnvironment();
+        DatoFake.primaryEnvironment();
+        DatoFake.sandboxEnvironment();
 
         const backups = await client.backups();
 
@@ -46,12 +48,12 @@ describe('client', () => {
 
     it('can get all backups', async () => {
         const client: Dato = createClient();
-        fakePrimaryEnvironment();
+        DatoFake.primaryEnvironment();
         const expectation = [
-            fakeBackup(),
-            fakeBackup(),
+            DatoFake.backup(),
+            DatoFake.backup(),
         ];
-        fakeSandboxEnvironment();
+        DatoFake.sandboxEnvironment();
 
         const backups = await client.backups();
 
@@ -60,9 +62,9 @@ describe('client', () => {
 
     it('can return the primary environment id', async () => {
         const client: Dato = createClient();
-        fakeBackup();
-        fakePrimaryEnvironment();
-        fakeSandboxEnvironment();
+        DatoFake.backup();
+        DatoFake.primaryEnvironment();
+        DatoFake.sandboxEnvironment();
 
         const primaryEnvironmentId = await client.primaryEnvironmentId();
 
@@ -73,7 +75,7 @@ describe('client', () => {
         const client: Dato = createClient();
         const environmentId = 'main';
         const forkId = 'backup-some-timestamp';
-        fakePrimaryEnvironment();
+        DatoFake.primaryEnvironment();
 
         const backup = await client.forkEnvironment(environmentId, forkId);
 
@@ -82,16 +84,48 @@ describe('client', () => {
                 id: forkId,
             }),
         );
-        expect(siteClient.environments.fork).toHaveBeenCalledWith(environmentId, { id: forkId });
+        expect(DatoFake.siteClient.environments.fork).toHaveBeenCalledWith(environmentId, { id: forkId });
     });
 
     it('can delete a backup environment by ID', async () => {
         const client: Dato = createClient();
-        const backup = fakeBackup();
+        const backup = DatoFake.backup();
 
         const deletedBackup = await client.deleteEnvironmentById(backup.id);
 
         expect(deletedBackup).toEqual(backup);
-        expect(siteClient.environments.destroy).toHaveBeenCalledWith(backup.id);
+        expect(DatoFake.siteClient.environments.destroy).toHaveBeenCalledWith(backup.id);
+    });
+
+    it('can get a full data dump', async () => {
+        const client: Dato = createClient();
+
+        const dataDump = await client.dataDump();
+
+        expect(dataDump).toEqual(DatoFake.dataDump);
+        expect(DatoFake.siteClient.items.all).toHaveBeenCalledWith({}, { allPages: true });
+    });
+
+    it('can get all asset URIs', async () => {
+        const client: Dato = createClient();
+
+        const assetURIs = await client.assetURIs();
+
+        expect(assetURIs).toContainEqual(
+            expect.stringContaining(`https://${DatoFake.imgixHost}/`),
+        );
+        expect(DatoFake.siteClient.uploads.all).toHaveBeenCalledWith({}, { allPages: true });
+    });
+
+    it('can get all asset URIs using a custom proxy domain', async () => {
+        process.env.DATOCMS_BACKUP_ASSETS_PROXY = DATOCMS_BACKUP_ASSETS_PROXY;
+        const client: Dato = createClient();
+
+        const assetURIs = await client.assetURIs();
+
+        expect(assetURIs).toContainEqual(
+            expect.stringContaining(`https://${DATOCMS_BACKUP_ASSETS_PROXY}/`),
+        );
+        expect(DatoFake.siteClient.uploads.all).toHaveBeenCalledWith({}, { allPages: true });
     });
 });

@@ -6,13 +6,13 @@ const FG_RED = '\x1b[31m';
 const RESET = '\x1b[0m';
 
 export type Output = {
-    misconfig: (message: string) => void
-    line: (message: string, icon?: string) => void
-    confirm: (question: string) => Promise<boolean>
-    completed: (message: string) => void
-    error: (message: string) => void
-    debug: (...data: any[]) => void
-    help: () => void
+    misconfig(message: string): void
+    line(message: string, icon?: string): void
+    confirm(question: string): Promise<boolean>
+    completed(message: string): void
+    error(message: string): void
+    debug(...data: any[]): void
+    help(): void
 }
 
 export type OutputOptions = {

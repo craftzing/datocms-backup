@@ -13,11 +13,16 @@ export async function handle(process: Function, output: Output): Promise<void> {
         }
 
         if (error instanceof RuntimeError) {
-            output.error(error.message);
+            handleRuntimeError(error);
 
             return;
         }
 
         throw error;
+    }
+
+    function handleRuntimeError(error: RuntimeError): void {
+        output.debug(error.originalError);
+        output.error(error.message);
     }
 }

@@ -2,10 +2,10 @@ import { Output } from './output';
 
 export type Command = {
     readonly name: string
-    readonly arguments?: ArgumentDefinition[]
+    readonly args?: ArgumentDefinition[]
     readonly options?: OptionDefinition[]
-    readonly handle: Handler
     readonly subCommands?: Command[]
+    handle(args: Arguments, options: Options, output: Output): Promise<void>
 }
 
 export type ArgumentDefinition = {
@@ -23,12 +23,11 @@ export type OptionDefinition = {
     readonly flag: string
     readonly shortFlag?: string
     readonly description: string
+    readonly choices?: string[]
     readonly defaultValue?: string | boolean
 }
 
 export type Options = {
-    [name: string]: boolean
+    [name: string]: boolean | string
     debug: boolean
 }
-
-export type Handler = (args: Arguments, options: Options, output: Output) => Promise<void>;

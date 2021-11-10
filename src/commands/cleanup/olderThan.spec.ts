@@ -3,23 +3,28 @@ import { expectOutputToBeCanceled, expectOutputToBeCompleted } from '../../../.j
 import { FailedToStartCleanup, MisconfigurationError } from '../../errors/misconfigurationErrors';
 import { CleanupFailed, RuntimeError } from '../../errors/runtimeErrors';
 import { fakeConfirmation, output } from '../../output.fake';
-import { client, fakeBackup, fakeErrorWhileGettingBackups } from '../../dato.fake';
+import * as DatoFake from '../../dato.fake';
 import { BackupEnvironment } from '../../dato';
 import { ArgumentDefinition, OptionDefinition } from '../../command';
-import { COMMAND } from './olderThan';
+import * as Command from './olderThan';
 
 jest.mock('../../dato', () => ({
     ...jest.requireActual<object>('../../dato'),
-    createClient: jest.fn(() => client),
+    createClient: jest.fn(() => DatoFake.client),
 }));
 
 describe('command', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+        DatoFake.reset();
+    });
+
     it('should have a descriptive name', () => {
-        expect(COMMAND.name).toEqual('older-than');
+        expect(Command.name).toEqual('older-than');
     });
 
     it('should have arguments', () => {
-        expect(COMMAND.arguments).toEqual<ArgumentDefinition[]>([
+        expect(Command.args).toEqual<ArgumentDefinition[]>([
             {
                 name: 'age',
                 description: expect.any(String),
@@ -28,7 +33,7 @@ describe('command', () => {
     });
 
     it('should have options', () => {
-        expect(COMMAND.options).toEqual<OptionDefinition[]>([
+        expect(Command.options).toEqual<OptionDefinition[]>([
             {
                 flag: 'debug',
                 shortFlag: 'd',
@@ -42,10 +47,6 @@ describe('command', () => {
         ]);
     });
 
-    it('should not have subcommands', () => {
-        expect(COMMAND.subCommands).toEqual(undefined);
-    });
-
     const invalidAges = [
         ['nonsense'],
         ['1ymd'],
@@ -54,7 +55,7 @@ describe('command', () => {
 
     it.each(invalidAges)('should throw a misconfig error when the provided age is invalid', async (age: string) => {
         try {
-            await COMMAND.handle(
+            await Command.handle(
                 { age },
                 { debug: false },
                 output,
@@ -66,54 +67,54 @@ describe('command', () => {
     });
 
     it('should exit with an error when it failed to retrieve all existing backups', async () => {
-        fakeErrorWhileGettingBackups();
+        DatoFake.throwErrorWhileGettingBackups();
 
         try {
-            await COMMAND.handle(
+            await Command.handle(
                 { age: '1d' },
                 { debug: false },
                 output,
             );
         } catch (error) {
             expect(error).toBeInstanceOf(RuntimeError);
-            expect(error).toEqual(CleanupFailed.datoApiReturnedWithAnErrorWhileGettingBackupEnvironments());
+            expect(error).toBeInstanceOf(CleanupFailed);
         }
     });
 
     it('can handle cleanup when there are no backups', async () => {
-        await COMMAND.handle(
+        await Command.handle(
             { age: '1w' },
             { debug: false },
             output,
         );
 
-        expect(client.deleteEnvironmentById).not.toHaveBeenCalled();
+        expect(DatoFake.client.deleteEnvironmentById).not.toHaveBeenCalled();
         expectOutputToBeCompleted(output);
     });
 
     it('can handle cleanup when there are no backups older than the retention date', async () => {
-        fakeBackup(DateTime.local().minus({ weeks: 1 }).toISO());
+        DatoFake.backup(DateTime.local().minus({ weeks: 1 }).toISO());
 
-        await COMMAND.handle(
+        await Command.handle(
             { age: '2w' },
             { debug: false },
             output,
         );
 
-        expect(client.deleteEnvironmentById).not.toHaveBeenCalled();
+        expect(DatoFake.client.deleteEnvironmentById).not.toHaveBeenCalled();
         expectOutputToBeCompleted(output);
     });
 
     it('does not cleanup backups when confirmation is rejected', async () => {
-        fakeBackup(DateTime.local().minus({ days: 3 }).toISO());
+        DatoFake.backup(DateTime.local().minus({ days: 3 }).toISO());
 
-        await COMMAND.handle(
+        await Command.handle(
             { age: '2d' },
             { debug: false },
             output,
         );
 
-        expect(client.deleteEnvironmentById).not.toHaveBeenCalled();
+        expect(DatoFake.client.deleteEnvironmentById).not.toHaveBeenCalled();
         expectOutputToBeCanceled(output);
         expect(output.confirm).toHaveBeenCalledTimes(1);
         expect(output.confirm).toHaveBeenCalledWith(
@@ -122,11 +123,11 @@ describe('command', () => {
     });
 
     it('can cleanup backups older than the specified age when confirmed', async () => {
-        const backupToDelete = fakeBackup(DateTime.local().minus({ months: 2 }).toISO());
-        const backupToKeep = fakeBackup(DateTime.local().minus({ months: 1 }).toISO());
+        const backupToDelete = DatoFake.backup(DateTime.local().minus({ months: 2 }).toISO());
+        const backupToKeep = DatoFake.backup(DateTime.local().minus({ months: 1 }).toISO());
         fakeConfirmation();
 
-        await COMMAND.handle(
+        await Command.handle(
             { age: '1m' },
             { debug: false },
             output,
@@ -139,9 +140,9 @@ describe('command', () => {
 });
 
 async function expectBackupNotToBeDeleted(backup: BackupEnvironment): Promise<void> {
-    expect(client.deleteEnvironmentById).not.toHaveBeenCalledWith(backup.id);
+    expect(DatoFake.client.deleteEnvironmentById).not.toHaveBeenCalledWith(backup.id);
 }
 
 async function expectBackupToBeDeleted(backup: BackupEnvironment): Promise<void> {
-    expect(client.deleteEnvironmentById).toHaveBeenCalledWith(backup.id);
+    expect(DatoFake.client.deleteEnvironmentById).toHaveBeenCalledWith(backup.id);
 }

@@ -18,7 +18,7 @@ describe('error handler', () => {
         const message = 'Whoops...';
 
         await handle(() => {
-            throw new RuntimeError(message);
+            throw new RuntimeError(message, new Error);
         }, output);
 
         expect(output.error).toHaveBeenCalledWith(message);

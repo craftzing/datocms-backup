@@ -1,21 +1,14 @@
 import { freezeNow } from '../../.jest/utils/dateTime';
 import { ArgumentDefinition, OptionDefinition } from '../command';
 import { output } from '../output.fake';
-import {
-    client,
-    fakePrimaryEnvironment,
-    fakeBackup,
-    fakeSandboxEnvironment,
-    fakeErrorWhileResolvingPrimaryId,
-    fakeErrorWhileCreatingBackup,
-} from '../dato.fake';
-import { COMMAND } from './create';
+import * as DatoFake from '../dato.fake';
 import { BackupEnvironmentId } from '../dato';
 import { BackupFailed, RuntimeError } from '../errors/runtimeErrors';
+import * as Command from './create';
 
 jest.mock('../dato', () => ({
     ...jest.requireActual<object>('../dato'),
-    createClient: jest.fn(() => client),
+    createClient: jest.fn(() => DatoFake.client),
 }));
 
 function resolveExpectedBackupId(): BackupEnvironmentId {
@@ -25,12 +18,21 @@ function resolveExpectedBackupId(): BackupEnvironmentId {
 }
 
 describe('command', () => {
+    const defaultOptions: Command.CreateOptions = {
+        debug: false,
+    };
+
+    beforeEach(() => {
+        jest.clearAllMocks();
+        DatoFake.reset();
+    });
+
     it('should have a descriptive name', () => {
-        expect(COMMAND.name).toEqual('create');
+        expect(Command.name).toEqual('create');
     });
 
     it('should have arguments', () => {
-        expect(COMMAND.arguments).toEqual<ArgumentDefinition[]>([
+        expect(Command.args).toEqual<ArgumentDefinition[]>([
             {
                 name: 'environmentId',
                 description: expect.any(String),
@@ -40,7 +42,7 @@ describe('command', () => {
     });
 
     it('should have options', () => {
-        expect(COMMAND.options).toEqual<OptionDefinition[]>([
+        expect(Command.options).toEqual<OptionDefinition[]>([
             {
                 flag: 'debug',
                 shortFlag: 'd',
@@ -49,39 +51,35 @@ describe('command', () => {
         ]);
     });
 
-    it('should not have subcommands', () => {
-        expect(COMMAND.subCommands).toEqual(undefined);
-    });
-
     it('should exit with an error when it failed to resolve the primary environment', async () => {
-        fakeErrorWhileResolvingPrimaryId();
+        DatoFake.throwErrorWhileResolvingPrimaryId();
 
         try {
-            await COMMAND.handle(
+            await Command.handle(
                 { environmentId: 'primary' },
-                { debug: false },
+                defaultOptions,
                 output,
             );
         } catch (error) {
             expect(error).toBeInstanceOf(RuntimeError);
-            expect(error).toEqual(BackupFailed.datoApiRespondedWithAnErrorWhileResolvingPrimaryEnvironment())
+            expect(error).toBeInstanceOf(BackupFailed);
         }
     });
 
     it('can create backups for the primary environment', async () => {
-        const primary = fakePrimaryEnvironment();
-        fakeBackup();
-        fakeSandboxEnvironment();
+        const primary = DatoFake.primaryEnvironment();
+        DatoFake.backup();
+        DatoFake.sandboxEnvironment();
         const expectedBackupId = resolveExpectedBackupId();
 
-        await COMMAND.handle(
+        await Command.handle(
             { environmentId: 'primary' },
-            { debug: false },
+            defaultOptions,
             output,
         );
 
-        expect(client.forkEnvironment).toHaveBeenCalledTimes(1);
-        expect(client.forkEnvironment).toHaveBeenCalledWith(primary.id, expectedBackupId);
+        expect(DatoFake.client.forkEnvironment).toHaveBeenCalledTimes(1);
+        expect(DatoFake.client.forkEnvironment).toHaveBeenCalledWith(primary.id, expectedBackupId);
         expect(output.completed).toHaveBeenCalledTimes(1);
         expect(output.completed).toHaveBeenCalledWith(
             expect.stringContaining(expectedBackupId),
@@ -89,36 +87,35 @@ describe('command', () => {
     });
 
     it('should exit with an error when it failed to create a backup', async () => {
-        const env = fakePrimaryEnvironment();
-        fakeErrorWhileCreatingBackup();
-        const expectedBackupId = resolveExpectedBackupId();
+        const env = DatoFake.primaryEnvironment();
+        DatoFake.throwErrorWhileCreatingBackup();
 
         try {
-            await COMMAND.handle(
+            await Command.handle(
                 { environmentId: env.id },
-                { debug: false },
+                defaultOptions,
                 output,
             );
         } catch (error) {
             expect(error).toBeInstanceOf(RuntimeError);
-            expect(error).toEqual(BackupFailed.datoApiRespondedWithAnErrorWhileCreatingBackup(expectedBackupId));
+            expect(error).toBeInstanceOf(BackupFailed);
         }
     });
 
     it('can create backups for any existing environment', async () => {
-        fakePrimaryEnvironment();
-        const env = fakeSandboxEnvironment();
+        DatoFake.primaryEnvironment();
+        const env = DatoFake.sandboxEnvironment();
         const expectedBackupId = resolveExpectedBackupId();
 
-        await COMMAND.handle(
+        await Command.handle(
             { environmentId: env.id },
-            { debug: false },
+            defaultOptions,
             output,
         );
 
         expect(output.debug).toHaveBeenCalled();
-        expect(client.forkEnvironment).toHaveBeenCalledTimes(1);
-        expect(client.forkEnvironment).toHaveBeenCalledWith(env.id, expectedBackupId);
+        expect(DatoFake.client.forkEnvironment).toHaveBeenCalledTimes(1);
+        expect(DatoFake.client.forkEnvironment).toHaveBeenCalledWith(env.id, expectedBackupId);
         expect(output.completed).toHaveBeenCalledTimes(1);
         expect(output.completed).toHaveBeenCalledWith(
             expect.stringContaining(expectedBackupId),
