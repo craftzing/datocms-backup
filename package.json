@@ -1,6 +1,6 @@
 {
   "name": "datocms-backup",
-  "version": "0.1.0-beta1",
+  "version": "0.1.0-beta2",
   "description": "A container to manage DatoCMS environment backups",
   "main": "./bin/index.js",
   "bin": "./bin/index.js",
