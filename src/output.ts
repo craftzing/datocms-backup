@@ -3,7 +3,6 @@ import { prompt } from 'inquirer';
 const FG_GREEN = '\x1b[32m';
 const FG_MAGENTA = '\x1b[35m';
 const FG_RED = '\x1b[31m';
-const FG_YELLOW = '\x1b[33m';
 const RESET = '\x1b[0m';
 
 export type Output = {
@@ -12,7 +11,6 @@ export type Output = {
     confirm(question: string): Promise<boolean>
     completed(message: string): void
     error(message: string): void
-    warn(message: string): void
     debug(...data: any[]): void
     help(): void
 }
@@ -56,10 +54,6 @@ export function createOutput(options: OutputOptions): Output {
         error(message: string): void {
             console.error(FG_RED + `🧨 ${message}` + RESET);
             process.exit(1);
-        },
-
-        warn(message: string): void {
-            console.warn(FG_YELLOW + `⚠️ ${message}` + RESET);
         },
 
         debug(...data: any[]): void {

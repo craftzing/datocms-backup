@@ -44,15 +44,6 @@ describe('output', () => {
         await expect(outputProcess).toExitWithCode(1);
     });
 
-    it('can write a warning message to stderr', async () => {
-        const message = 'Something went wrong...';
-
-        const outputProcess = () => output.warn(message);
-
-        await expect(outputProcess).toWriteToStdErr(`\x1b[33m⚠️ ${message}\x1b[0m`);
-        await expect(outputProcess).toExitWithCode(0);
-    });
-
     it('does not write debug messages to stdout when debugging is not explicitly enabled', async () => {
         const message = 'Some debugging info...';
 
