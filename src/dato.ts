@@ -16,15 +16,17 @@ export type BackupEnvironment = Environment & {
 export type BackupEnvironmentId = `backup-${string}`;
 
 export type Dato = {
-    backups: () => Promise<BackupEnvironment[]>
-    primaryEnvironmentId: () => Promise<string>
-    forkEnvironment: (environmentId: string, forkId: BackupEnvironmentId) => Promise<Environment>
-    deleteEnvironmentById: (environmentId: BackupEnvironmentId) => Promise<BackupEnvironment>
-    dataDump: () => Promise<string>
+    backups(): Promise<BackupEnvironment[]>
+    primaryEnvironmentId(): Promise<string>
+    forkEnvironment(environmentId: string, forkId: BackupEnvironmentId): Promise<Environment>
+    deleteEnvironmentById(environmentId: BackupEnvironmentId): Promise<BackupEnvironment>
+    dataDump(): Promise<string>
+    assetURIs(): Promise<Array<string>>
 }
 
 export function createClient(): Dato {
     const siteClient: SiteClient = createSiteClient();
+    const assetsProxy: string = process.env.DATOCMS_BACKUP_ASSETS_PROXY;
 
     function createSiteClient(): SiteClient {
         const apiToken = process.env.DATOCMS_BACKUP_API_TOKEN;
@@ -62,6 +64,13 @@ export function createClient(): Dato {
 
             return JSON.stringify(response, null, 2);
         },
+
+        async assetURIs(): Promise<Array<string>> {
+            const assetsHost = assetsProxy || (await siteClient.site.find()).imgixHost;
+            const uploads: Array<{ path: string }> = await siteClient.uploads.all({}, { allPages: true });
+
+            return uploads.map<string>(({ path }) => `https://${assetsHost}${path}`);
+        }
     }
 }
 

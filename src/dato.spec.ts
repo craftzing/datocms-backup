@@ -9,6 +9,7 @@ jest.mock('datocms-client', () => ({
 
 describe('client', () => {
     const DATOCMS_BACKUP_API_TOKEN = 'some-fake-api-token';
+    const DATOCMS_BACKUP_ASSETS_PROXY = 'some-fake-assets.proxy/content-assets';
 
     beforeEach(() => {
         jest.clearAllMocks();
@@ -103,5 +104,28 @@ describe('client', () => {
 
         expect(dataDump).toEqual(DatoFake.dataDump);
         expect(DatoFake.siteClient.items.all).toHaveBeenCalledWith({}, { allPages: true });
+    });
+
+    it('can get all asset URIs', async () => {
+        const client: Dato = createClient();
+
+        const assetURIs = await client.assetURIs();
+
+        expect(assetURIs).toContainEqual(
+            expect.stringContaining(`https://${DatoFake.imgixHost}/`),
+        );
+        expect(DatoFake.siteClient.uploads.all).toHaveBeenCalledWith({}, { allPages: true });
+    });
+
+    it('can get all asset URIs using a custom proxy domain', async () => {
+        process.env.DATOCMS_BACKUP_ASSETS_PROXY = DATOCMS_BACKUP_ASSETS_PROXY;
+        const client: Dato = createClient();
+
+        const assetURIs = await client.assetURIs();
+
+        expect(assetURIs).toContainEqual(
+            expect.stringContaining(`https://${DATOCMS_BACKUP_ASSETS_PROXY}/`),
+        );
+        expect(DatoFake.siteClient.uploads.all).toHaveBeenCalledWith({}, { allPages: true });
     });
 });

@@ -1,3 +1,4 @@
+import { URL } from 'url';
 import { DateTime } from 'luxon';
 import { ArgumentDefinition, Arguments, OptionDefinition, Options } from '../command';
 import { Output } from '../output';
@@ -37,13 +38,15 @@ export async function handle(args: DumpArguments, options: Options, output: Outp
 
     output.line(`Creating dump "${path}" on "${args.storage}"...`, '⏳');
 
-    const dataDump: string = await getDataDump();
+    const [dataDump, assetURIs] = await Promise.all([
+        getDataDump(),
+        getAssetURIs(),
+    ]);
 
-    try {
-        await storage.upload(`${path}/data.json`, dataDump);
-    } catch (error) {
-        throw DumpFailed.s3ApiRespondedWithAnErrorWhileUploadingData(error);
-    }
+    await Promise.all([
+        uploadDataDumpToStorage(),
+        uploadAssetsToStorage(),
+    ]);
 
     output.completed(`Dump "${path}" on "${args.storage}" completed.`);
 
@@ -54,6 +57,43 @@ export async function handle(args: DumpArguments, options: Options, output: Outp
             return await dato.dataDump();
         } catch (error) {
             throw DumpFailed.datoApiRespondedWithAnErrorWhileGettingDataDump(error);
+        }
+    }
+
+    async function getAssetURIs(): Promise<Array<string>> {
+        output.line('Fetching all assets from DatoCMS...', '🔎');
+
+        try {
+            return await dato.assetURIs();
+        } catch (error) {
+            throw DumpFailed.datoApiRespondedWithAnErrorWhileGettingDataDump(error);
+        }
+    }
+
+    async function uploadDataDumpToStorage(): Promise<void> {
+        output.line(`Uploading data dump to ${args.storage}...`, '🏄');
+
+        try {
+            await storage.upload(`${path}/data.json`, dataDump);
+        } catch (error) {
+            throw DumpFailed.storageApiRespondedWithAnErrorWhileUploadingData(error);
+        }
+    }
+
+    async function uploadAssetsToStorage(): Promise<void> {
+        output.line(`Uploading ${assetURIs.length} asset(s) to ${args.storage}...`, '🏄');
+
+        for (const assetURI of assetURIs) {
+            const fileName: string = new URL(assetURI).pathname;
+            const assetPathOnStorage: string = `${path}${fileName}`;
+
+            try {
+                await storage.uploadFromUri(assetPathOnStorage, assetURI);
+            } catch (error) {
+                throw DumpFailed.errorWhileUploadingAsset(assetPathOnStorage, error);
+            }
+
+            output.line(`${assetPathOnStorage} uploaded!`, '>');
         }
     }
 }

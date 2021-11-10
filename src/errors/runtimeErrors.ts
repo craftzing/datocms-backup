@@ -52,9 +52,23 @@ export class DumpFailed extends RuntimeError {
         );
     }
 
-    static s3ApiRespondedWithAnErrorWhileUploadingData(originalError: Error): DumpFailed {
+    static storageApiRespondedWithAnErrorWhileUploadingData(originalError: Error): DumpFailed {
         return new DumpFailed(
-            `Dump failed due to an error response from the AWS S3 API while uploading data.`,
+            `Dump failed due to an error response from the storage API while uploading data.`,
+            originalError,
+        );
+    }
+
+    static errorWhileDownloadingAsset(assetURI: string, originalError: Error): DumpFailed {
+        return new DumpFailed(
+            `Dump failed due to an error while downloading asset "${assetURI}".`,
+            originalError,
+        );
+    }
+
+    static errorWhileUploadingAsset(assetPath: string, originalError: Error): DumpFailed {
+        return new DumpFailed(
+            `Dump failed due to an error while uploading asset "${assetPath}".`,
             originalError,
         );
     }

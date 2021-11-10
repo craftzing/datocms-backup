@@ -4,6 +4,7 @@ import { Dato, BackupEnvironment, BackupEnvironmentId, Environment, isBackupEnvi
 
 const PRIMARY_ENV_ID = 'main';
 let environments: Environment[] = [];
+let assetURIs: string[] = [];
 
 export let errors: {
     [name: string]: Error | undefined
@@ -11,6 +12,7 @@ export let errors: {
 
 export function reset(): void {
     environments = [];
+    assetURIs = [];
     errors = {
         primaryEnvironmentId: undefined,
         backups: undefined,
@@ -82,6 +84,10 @@ export function sandboxEnvironment(id?: string): Environment {
     fakeEnvironments(env);
 
     return env;
+}
+
+export function willReturnAssetURIs(...assetURI: string[]): void {
+    assetURIs = assetURIs.concat(assetURI);
 }
 
 const datoItems = {
@@ -174,6 +180,6 @@ export const client: Dato = {
     }),
 
     assetURIs: jest.fn(async (): Promise<Array<string>> => {
-        return [];
+        return assetURIs;
     }),
 };

@@ -1,17 +1,24 @@
-import { Storage } from './storage';
+import { Driver, Storage } from './storage';
 
+export let usedDriver: Driver = undefined;
 export let errors: {
     [name: string]: Error | undefined
 } = {};
 
-beforeEach(() => {
-    jest.clearAllMocks();
+export function reset(): void {
+    usedDriver = undefined;
     errors = {
         upload: undefined,
     };
-});
+}
 
-export function fakeErrorWhileUploadingToStorage(): void {
+export function createWithDriver(driver: Driver): Storage {
+    usedDriver = driver;
+
+    return storage;
+}
+
+export function throwErrorWhileUploadingToStorage(): void {
     errors.dataDump = new Error('Faked an error while uploading to storage.');
 }
 
@@ -21,6 +28,10 @@ export const storage: Storage = {
             throw errors.upload;
         }
 
+        return Promise.resolve();
+    }),
+
+    uploadFromUri: jest.fn(async (path: string, uri: string): Promise<void> => {
         return Promise.resolve();
     }),
 }

@@ -1,5 +1,5 @@
+import * as AwsFake from '../aws.fake';
 import { Storage } from '../storage';
-import { S3 } from '../aws.fake';
 import { createStorage } from './s3';
 import { CannotCreateS3Storage } from '../errors/misconfigurationErrors';
 
@@ -7,11 +7,12 @@ const DATOCMS_BACKUP_AWS_ACCESS_KEY_ID = 'some-fake-access-key-id';
 const DATOCMS_BACKUP_AWS_ACCESS_KEY_SECRET = 'some-fake-access-key-secret';
 
 jest.mock('aws-sdk', () => ({
-    S3: jest.fn(() => S3),
+    S3: jest.fn(() => AwsFake.S3),
 }));
 
 describe('s3 storage', () => {
     beforeEach(() => {
+        jest.clearAllMocks();
         process.env = {
             DATOCMS_BACKUP_AWS_ACCESS_KEY_ID,
             DATOCMS_BACKUP_AWS_ACCESS_KEY_SECRET,
@@ -49,8 +50,8 @@ describe('s3 storage', () => {
 
         await storage.upload(path, content);
 
-        expect(S3.upload).toHaveBeenCalledTimes(1);
-        expect(S3.upload).toHaveBeenCalledWith({
+        expect(AwsFake.S3.upload).toHaveBeenCalledTimes(1);
+        expect(AwsFake.S3.upload).toHaveBeenCalledWith({
             Bucket: 'bucket',
             Key: 'path/to/file.json',
             Body: content,
