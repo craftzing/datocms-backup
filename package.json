@@ -33,7 +33,7 @@
     "dotenv": "^10.0.0",
     "got": "^11.8.5",
     "inquirer": "^8.2.4",
-    "luxon": "^2.0.2"
+    "luxon": "^2.5.0"
   },
   "devDependencies": {
     "@types/jest": "^27.0.2",
