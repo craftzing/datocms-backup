@@ -3,6 +3,7 @@
     "module": "commonjs",
     "target": "es2020",
     "lib": ["es2020"],
+    "esModuleInterop": true,
     "moduleResolution": "node",
     "sourceMap": true,
     "outDir": "bin",

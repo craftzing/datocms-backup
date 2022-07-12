@@ -5,7 +5,7 @@ jobs:
   runTests:
     name: 'Run tests'
     runs-on: ubuntu-latest
-    container: node:16.6-alpine3.14
+    container: node:16.16-alpine3.16
     steps:
       - name: 'Checkout code'
         uses: actions/checkout@v2

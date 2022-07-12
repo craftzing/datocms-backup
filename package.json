@@ -7,7 +7,7 @@
   "scripts": {
     "backup": "npm run build && node ./bin/index.js",
     "build": "rm -rf bin && npx tsc",
-    "tests": "jest"
+    "tests": "jest --maxWorkers=1"
   },
   "repository": {
     "type": "git",
@@ -27,20 +27,20 @@
   },
   "homepage": "https://github.com/craftzing/datocms-backup#readme",
   "dependencies": {
-    "aws-sdk": "^2.1022.0",
-    "commander": "^8.2.0",
-    "datocms-client": "^3.4.18",
+    "aws-sdk": "^2.1172.0",
+    "commander": "^9.3.0",
+    "datocms-client": "^3.3.0",
     "dotenv": "^10.0.0",
-    "got": "^11.8.2",
-    "inquirer": "^8.2.0",
-    "luxon": "^2.0.2"
+    "got": "^11.8.5",
+    "inquirer": "^8.2.4",
+    "luxon": "^2.5.0"
   },
   "devDependencies": {
-    "@types/jest": "^27.0.2",
-    "@types/node": "^16.10.2",
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.11.43",
     "faker": "^5.5.3",
-    "jest": "^27.2.5",
-    "ts-jest": "^27.0.5",
-    "typescript": "^4.4.3"
+    "jest": "^27.5.1",
+    "ts-jest": "^27.1.5",
+    "typescript": "^4.7.4"
   }
 }
