@@ -6,7 +6,7 @@ ENV NODE_ENV=development
 WORKDIR /code
 COPY . .
 
-RUN npm i
+RUN npm ci
 RUN npx tsc
 
 # Final runnable image for the CLI
@@ -22,7 +22,7 @@ WORKDIR /code
 COPY --from=builder /code/package-lock.json ./package-lock.json
 COPY --from=builder /code/package.json ./package.json
 COPY --from=builder /code/bin ./bin
-RUN npm i --only=production
+RUN npm ci --only=production
 
 RUN addgroup -g 1001 -S app \
     && adduser -u 1001 -S app -G app \
