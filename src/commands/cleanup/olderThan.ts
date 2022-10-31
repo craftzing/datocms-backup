@@ -41,7 +41,7 @@ export async function handle(args: OlderThanArguments, options: Options, output:
     }
 
     const backupsOlderThanRetentionDate = backups.filter((backup: BackupEnvironment): boolean => {
-        return DateTime.fromISO(backup.meta.createdAt) < retentionDate;
+        return DateTime.fromISO(backup.meta.created_at) < retentionDate;
     });
 
     output.debug('Backups older than retention date:', backupsOlderThanRetentionDate);

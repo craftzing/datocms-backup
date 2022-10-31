@@ -10,7 +10,7 @@ import * as Command from './olderThan';
 
 jest.mock('../../dato', () => ({
     ...jest.requireActual<object>('../../dato'),
-    createClient: jest.fn(() => DatoFake.client),
+    createClient: jest.fn(() => DatoFake.dato),
 }));
 
 describe('command', () => {
@@ -88,7 +88,7 @@ describe('command', () => {
             output,
         );
 
-        expect(DatoFake.client.deleteEnvironmentById).not.toHaveBeenCalled();
+        expect(DatoFake.dato.deleteEnvironmentById).not.toHaveBeenCalled();
         expectOutputToBeCompleted(output);
     });
 
@@ -101,7 +101,7 @@ describe('command', () => {
             output,
         );
 
-        expect(DatoFake.client.deleteEnvironmentById).not.toHaveBeenCalled();
+        expect(DatoFake.dato.deleteEnvironmentById).not.toHaveBeenCalled();
         expectOutputToBeCompleted(output);
     });
 
@@ -114,7 +114,7 @@ describe('command', () => {
             output,
         );
 
-        expect(DatoFake.client.deleteEnvironmentById).not.toHaveBeenCalled();
+        expect(DatoFake.dato.deleteEnvironmentById).not.toHaveBeenCalled();
         expectOutputToBeCanceled(output);
         expect(output.confirm).toHaveBeenCalledTimes(1);
         expect(output.confirm).toHaveBeenCalledWith(
@@ -140,9 +140,9 @@ describe('command', () => {
 });
 
 async function expectBackupNotToBeDeleted(backup: BackupEnvironment): Promise<void> {
-    expect(DatoFake.client.deleteEnvironmentById).not.toHaveBeenCalledWith(backup.id);
+    expect(DatoFake.dato.deleteEnvironmentById).not.toHaveBeenCalledWith(backup.id);
 }
 
 async function expectBackupToBeDeleted(backup: BackupEnvironment): Promise<void> {
-    expect(DatoFake.client.deleteEnvironmentById).toHaveBeenCalledWith(backup.id);
+    expect(DatoFake.dato.deleteEnvironmentById).toHaveBeenCalledWith(backup.id);
 }

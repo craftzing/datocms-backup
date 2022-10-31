@@ -1,10 +1,10 @@
-import { SiteClient } from 'datocms-client';
+import { buildClient } from '@datocms/cma-client-node';
 import { CannotCreateDatoClient } from './errors/misconfigurationErrors';
 import { createClient, Dato, Environment } from './dato';
 import * as DatoFake from './dato.fake';
 
-jest.mock('datocms-client', () => ({
-    SiteClient: jest.fn(() => DatoFake.siteClient),
+jest.mock('@datocms/cma-client-node', () => ({
+    buildClient: jest.fn(() => DatoFake.client),
 }));
 
 describe('client', () => {
@@ -33,7 +33,7 @@ describe('client', () => {
     it('can be created with the appropriate API token', (): void => {
         createClient();
 
-        expect(SiteClient).toHaveBeenCalledWith(DATOCMS_BACKUP_API_TOKEN);
+        expect(buildClient).toHaveBeenCalledWith({ apiToken: DATOCMS_BACKUP_API_TOKEN });
     });
 
     it("returns an empty array when getting backups when there aren't any", async () => {
@@ -84,7 +84,7 @@ describe('client', () => {
                 id: forkId,
             }),
         );
-        expect(DatoFake.siteClient.environments.fork).toHaveBeenCalledWith(environmentId, { id: forkId });
+        expect(DatoFake.client.environments.fork).toHaveBeenCalledWith(environmentId, { id: forkId });
     });
 
     it('can delete a backup environment by ID', async () => {
@@ -94,7 +94,7 @@ describe('client', () => {
         const deletedBackup = await client.deleteEnvironmentById(backup.id);
 
         expect(deletedBackup).toEqual(backup);
-        expect(DatoFake.siteClient.environments.destroy).toHaveBeenCalledWith(backup.id);
+        expect(DatoFake.client.environments.destroy).toHaveBeenCalledWith(backup.id);
     });
 
     it('can get a full data dump', async () => {
@@ -103,7 +103,7 @@ describe('client', () => {
         const dataDump = await client.dataDump();
 
         expect(dataDump).toEqual(DatoFake.dataDump);
-        expect(DatoFake.siteClient.items.all).toHaveBeenCalledWith({}, { allPages: true });
+        expect(DatoFake.client.items.listPagedIterator).toHaveBeenCalled();
     });
 
     it('can get all asset URIs', async () => {
@@ -114,7 +114,7 @@ describe('client', () => {
         expect(assetURIs).toContainEqual(
             expect.stringContaining(`https://${DatoFake.imgixHost}/`),
         );
-        expect(DatoFake.siteClient.uploads.all).toHaveBeenCalledWith({}, { allPages: true });
+        expect(DatoFake.client.uploads.listPagedIterator).toHaveBeenCalled();
     });
 
     it('can get all asset URIs using a custom proxy domain', async () => {
@@ -126,6 +126,6 @@ describe('client', () => {
         expect(assetURIs).toContainEqual(
             expect.stringContaining(`https://${DATOCMS_BACKUP_ASSETS_PROXY}/`),
         );
-        expect(DatoFake.siteClient.uploads.all).toHaveBeenCalledWith({}, { allPages: true });
+        expect(DatoFake.client.uploads.listPagedIterator).toHaveBeenCalled();
     });
 });

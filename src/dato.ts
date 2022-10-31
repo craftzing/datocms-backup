@@ -1,11 +1,11 @@
-import { SiteClient } from 'datocms-client';
+import { buildClient, Client, SimpleSchemaTypes } from '@datocms/cma-client-node';
 import { CannotCreateDatoClient } from './errors/misconfigurationErrors';
 
 export type Environment = {
     readonly id: string
     readonly meta: {
         readonly primary: boolean
-        readonly createdAt: string
+        readonly created_at: string
     }
 }
 
@@ -25,59 +25,67 @@ export type Dato = {
 }
 
 export function createClient(): Dato {
-    const siteClient: SiteClient = createSiteClient();
+    const client: Client = createClient();
     const assetsProxy: string = process.env.DATOCMS_BACKUP_ASSETS_PROXY;
 
-    function createSiteClient(): SiteClient {
+    function createClient(): Client {
         const apiToken = process.env.DATOCMS_BACKUP_API_TOKEN;
 
         if (! apiToken) {
             throw CannotCreateDatoClient.missingApiToken();
         }
 
-        return new SiteClient(apiToken);
+        return buildClient({ apiToken });
     }
 
     return {
         async backups(): Promise<BackupEnvironment[]> {
-            const environments = await siteClient.environments.all();
+            const environments = await client.environments.list();
 
             return environments.filter(isBackupEnvironment);
         },
 
         async primaryEnvironmentId(): Promise<string> {
-            const envs: [Environment] = await siteClient.environments.all();
+            const envs = await client.environments.list();
 
             return envs.find(isPrimaryEnvironment).id;
         },
 
         async forkEnvironment(environmentId: string, forkId: BackupEnvironmentId): Promise<Environment> {
-            return siteClient.environments.fork(environmentId, { id: forkId });
+            return client.environments.fork(environmentId, { id: forkId });
         },
 
         async deleteEnvironmentById(environmentId: BackupEnvironmentId): Promise<BackupEnvironment> {
-            return siteClient.environments.destroy(environmentId);
+            return client.environments.destroy(environmentId);
         },
 
         async dataDump(): Promise<string> {
-            const response = await siteClient.items.all({}, { allPages: true });
+            const items = [];
 
-            return JSON.stringify(response, null, 2);
+            for await (const item of client.items.listPagedIterator()) {
+                items.push(item);
+            }
+
+            return JSON.stringify(items, null, 2);
         },
 
         async assetURIs(): Promise<Array<string>> {
-            const assetsHost = assetsProxy || (await siteClient.site.find()).imgixHost;
-            const uploads: Array<{ path: string }> = await siteClient.uploads.all({}, { allPages: true });
+            const assetsHost = assetsProxy || (await client.site.find()).imgix_host;
+            const uploads = [];
 
-            return uploads.map<string>(({ path }) => `https://${assetsHost}${path}`);
+            for await (const upload of client.uploads.listPagedIterator()) {
+                uploads.push(upload);
+            }
+
+            return uploads.map<string>(({ path }: { path: string }) => `https://${assetsHost}${path}`);
         }
     }
 }
 
-export function isPrimaryEnvironment(env: Environment): boolean {
+export function isPrimaryEnvironment(env: SimpleSchemaTypes.Environment): boolean {
     return env.meta.primary === true;
 }
 
-export function isBackupEnvironment(backup: Environment): backup is BackupEnvironment {
+export function isBackupEnvironment(backup: SimpleSchemaTypes.Environment): boolean {
     return backup.id.startsWith('backup-');
 }
