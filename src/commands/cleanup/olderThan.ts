@@ -1,5 +1,5 @@
 import { DateTime, Duration } from 'luxon';
-import { ArgumentDefinition, Arguments, Command, OptionDefinition, Options } from '../../command';
+import { ArgumentDefinition, Arguments, OptionDefinition, Options } from '../../command';
 import { Output } from '../../output';
 import { createClient, BackupEnvironment } from '../../dato';
 import { DEBUG, CONFIRM } from '../../common/options';

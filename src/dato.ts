@@ -1,4 +1,4 @@
-import { buildClient, Client, SimpleSchemaTypes } from '@datocms/cma-client-node';
+import { buildClient, Client } from '@datocms/cma-client-node';
 import { CannotCreateDatoClient } from './errors/misconfigurationErrors';
 
 export type Environment = {
@@ -42,7 +42,7 @@ export function createClient(): Dato {
         async backups(): Promise<BackupEnvironment[]> {
             const environments = await client.environments.list();
 
-            return environments.filter(isBackupEnvironment);
+            return environments.filter(isBackupEnvironment) as BackupEnvironment[];
         },
 
         async primaryEnvironmentId(): Promise<string> {
@@ -56,7 +56,7 @@ export function createClient(): Dato {
         },
 
         async deleteEnvironmentById(environmentId: BackupEnvironmentId): Promise<BackupEnvironment> {
-            return client.environments.destroy(environmentId);
+            return client.environments.destroy(environmentId) as Promise<BackupEnvironment>;
         },
 
         async dataDump(): Promise<string> {
@@ -82,10 +82,10 @@ export function createClient(): Dato {
     }
 }
 
-export function isPrimaryEnvironment(env: SimpleSchemaTypes.Environment): boolean {
+export function isPrimaryEnvironment(env: Environment): boolean {
     return env.meta.primary === true;
 }
 
-export function isBackupEnvironment(backup: SimpleSchemaTypes.Environment): boolean {
+export function isBackupEnvironment(backup: Environment | BackupEnvironment): backup is BackupEnvironment {
     return backup.id.startsWith('backup-');
 }
