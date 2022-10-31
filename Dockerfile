@@ -1,4 +1,4 @@
-FROM node:16.16-alpine3.16 as builder
+FROM node:16.18-alpine3.16 as builder
 ARG CLI_VERSION
 ENV CLI_VERSION=$CLI_VERSION
 ENV NODE_ENV=development
@@ -10,7 +10,7 @@ RUN npm ci
 RUN npx tsc
 
 # Final runnable image for the CLI
-FROM node:16.16-alpine3.16
+FROM node:16.18-alpine3.16
 ARG CLI_VERSION
 ENV CLI_VERSION=$CLI_VERSION
 ENV NODE_ENV=production
