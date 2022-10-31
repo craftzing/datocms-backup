@@ -8,7 +8,7 @@ import * as Command from './create';
 
 jest.mock('../dato', () => ({
     ...jest.requireActual<object>('../dato'),
-    createClient: jest.fn(() => DatoFake.client),
+    createClient: jest.fn(() => DatoFake.dato),
 }));
 
 function resolveExpectedBackupId(): BackupEnvironmentId {
@@ -78,8 +78,8 @@ describe('command', () => {
             output,
         );
 
-        expect(DatoFake.client.forkEnvironment).toHaveBeenCalledTimes(1);
-        expect(DatoFake.client.forkEnvironment).toHaveBeenCalledWith(primary.id, expectedBackupId);
+        expect(DatoFake.dato.forkEnvironment).toHaveBeenCalledTimes(1);
+        expect(DatoFake.dato.forkEnvironment).toHaveBeenCalledWith(primary.id, expectedBackupId);
         expect(output.completed).toHaveBeenCalledTimes(1);
         expect(output.completed).toHaveBeenCalledWith(
             expect.stringContaining(expectedBackupId),
@@ -114,8 +114,8 @@ describe('command', () => {
         );
 
         expect(output.debug).toHaveBeenCalled();
-        expect(DatoFake.client.forkEnvironment).toHaveBeenCalledTimes(1);
-        expect(DatoFake.client.forkEnvironment).toHaveBeenCalledWith(env.id, expectedBackupId);
+        expect(DatoFake.dato.forkEnvironment).toHaveBeenCalledTimes(1);
+        expect(DatoFake.dato.forkEnvironment).toHaveBeenCalledWith(env.id, expectedBackupId);
         expect(output.completed).toHaveBeenCalledTimes(1);
         expect(output.completed).toHaveBeenCalledWith(
             expect.stringContaining(expectedBackupId),

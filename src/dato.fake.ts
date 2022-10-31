@@ -46,7 +46,7 @@ export function primaryEnvironment(): Environment {
         id: PRIMARY_ENV_ID,
         meta: {
             primary: true,
-            createdAt: faker.date.past(),
+            created_at: faker.date.past(),
         },
     };
 
@@ -56,14 +56,14 @@ export function primaryEnvironment(): Environment {
 }
 
 export function backup(isoBackupDate?: string): BackupEnvironment {
-    isoBackupDate = isoBackupDate || faker.date.past();
+    isoBackupDate = isoBackupDate || faker.date.past().toISOString();
     const backupDate = DateTime.fromISO(isoBackupDate).toFormat('yyyy-LL-dd');
     const backupId: BackupEnvironmentId = `backup-${backupDate}`;
     const env = {
         id: backupId,
         meta: {
             primary: false,
-            createdAt: isoBackupDate,
+            created_at: isoBackupDate,
         },
     };
 
@@ -77,7 +77,7 @@ export function sandboxEnvironment(id?: string): Environment {
         id: id ?? faker.lorem.word(),
         meta: {
             primary: false,
-            createdAt: faker.date.past(),
+            created_at: faker.date.past(),
         },
     };
 
@@ -90,22 +90,22 @@ export function willReturnAssetURIs(...assetURI: string[]): void {
     assetURIs = assetURIs.concat(assetURI);
 }
 
-const datoItems = {
-    key: 'All DatoCMS data...',
-};
+const datoItems = [
+    { key: 'All DatoCMS data...' },
+];
 export const dataDump: string = JSON.stringify(datoItems, null, 2);
 export const imgixHost = 'some.fake.imgix.host.com';
-export const siteClient = {
+export const client = {
     site: {
         find() {
             return {
-                imgixHost,
+                imgix_host: imgixHost,
             };
         },
     },
 
     environments: {
-        all(): Promise<Environment[]> {
+        list(): Promise<Environment[]> {
             return Promise.resolve(environments);
         },
 
@@ -132,17 +132,21 @@ export const siteClient = {
     },
 
     items: {
-        all: jest.fn(() => Promise.resolve(datoItems)),
+        listPagedIterator: jest.fn(async function* () {
+            for (const item of datoItems) {
+                yield Promise.resolve(item);
+            }
+        }),
     },
 
     uploads: {
-        all: jest.fn(() => Promise.resolve([
-            { path: faker.system.filePath() },
-        ])),
+        listPagedIterator: jest.fn(async function* () {
+            yield Promise.resolve({ path: faker.system.filePath() })
+        }),
     },
 };
 
-export const client: Dato = {
+export const dato: Dato = {
     backups(): Promise<BackupEnvironment[]> {
         if (errors.backups) {
             throw errors.backups;
@@ -168,7 +172,7 @@ export const client: Dato = {
     }),
 
     deleteEnvironmentById: jest.fn(async (environmentId: BackupEnvironmentId): Promise<BackupEnvironment> => {
-        return await siteClient.environments.destroy(environmentId);
+        return await client.environments.destroy(environmentId);
     }),
 
     dataDump: jest.fn(async (): Promise<string> => {

@@ -1,5 +1,5 @@
 import { DateTime, Duration } from 'luxon';
-import { ArgumentDefinition, Arguments, Command, OptionDefinition, Options } from '../../command';
+import { ArgumentDefinition, Arguments, OptionDefinition, Options } from '../../command';
 import { Output } from '../../output';
 import { createClient, BackupEnvironment } from '../../dato';
 import { DEBUG, CONFIRM } from '../../common/options';
@@ -41,7 +41,7 @@ export async function handle(args: OlderThanArguments, options: Options, output:
     }
 
     const backupsOlderThanRetentionDate = backups.filter((backup: BackupEnvironment): boolean => {
-        return DateTime.fromISO(backup.meta.createdAt) < retentionDate;
+        return DateTime.fromISO(backup.meta.created_at) < retentionDate;
     });
 
     output.debug('Backups older than retention date:', backupsOlderThanRetentionDate);

@@ -10,7 +10,7 @@ import * as Command from './dump';
 
 jest.mock('../dato', () => ({
     ...jest.requireActual<object>('../dato'),
-    createClient: jest.fn(() => DatoFake.client),
+    createClient: jest.fn(() => DatoFake.dato),
 }));
 
 jest.mock('../storage', () => ({

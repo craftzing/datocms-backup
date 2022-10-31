@@ -6,7 +6,7 @@
   "scripts": {
     "backup": "npm run build && node ./bin/index.js",
     "build": "rm -rf bin && npx tsc",
-    "tests": "jest --maxWorkers=1"
+    "tests": "jest --maxWorkers=1 --silent=false"
   },
   "repository": {
     "type": "git",
@@ -26,9 +26,9 @@
   },
   "homepage": "https://github.com/craftzing/datocms-backup#readme",
   "dependencies": {
+    "@datocms/cma-client-node": "^1.1.10",
     "aws-sdk": "^2.1243.0",
     "commander": "^9.4.1",
-    "datocms-client": "^3.5.21",
     "dotenv": "^16.0.3",
     "got": "^11.8.5",
     "inquirer": "^8.2.5",
