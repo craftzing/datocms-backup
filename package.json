@@ -32,7 +32,7 @@
     "dotenv": "^16.0.3",
     "got": "^11.8.5",
     "inquirer": "^8.2.5",
-    "luxon": "^3.0.4"
+    "luxon": "^3.2.1"
   },
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",
