@@ -1,0 +1,21 @@
+version: "3.9"
+services:
+  datocms-backup-preview:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: local.craftzing/datocms-backup:preview
+    container_name: datocms-backup.preview
+    restart: unless-stopped
+    tty: true
+    working_dir: /code
+    volumes:
+      - ./:/code:delegated
+
+  verify-datocms-backup-preview:
+    image: aquasec/trivy:0.34.0
+    command: ["image", "local.craftzing/datocms-backup:preview"]
+    volumes:
+      - $HOME/Library/Caches:/root/.cache/
+      - /var/run/docker.sock:/var/run/docker.sock
+      - .trivyignore:/.trivyignore
