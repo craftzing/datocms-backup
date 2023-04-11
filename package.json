@@ -27,7 +27,7 @@
   "homepage": "https://github.com/craftzing/datocms-backup#readme",
   "dependencies": {
     "@datocms/cma-client-node": "^1.2.4",
-    "aws-sdk": "^2.1243.0",
+    "aws-sdk": "^2.1354.0",
     "commander": "^9.4.1",
     "dotenv": "^16.0.3",
     "got": "^11.8.5",
